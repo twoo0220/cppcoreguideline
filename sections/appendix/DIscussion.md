@@ -1,12 +1,12 @@
 
 # <a name="S-discussion"></a>Appendix C: Discussion
 
-This section contains follow-up material on rules and sets of rules.
-In particular, here we present further rationale, longer examples, and discussions of alternatives.
+이 절은 규칙들과 규칙들의 집합에 대한 추가적인 내용을 담고 있다.  
+특히, 여기서 추가적인 이유, 더 긴 예제, 대안책들에 대한 토론들을 표현하고자 한다.
 
-### <a name="Sd-order"></a>Discussion: Define and initialize member variables in the order of member declaration
+### <a name="Sd-order"></a>토론: 멤버 변수들을 멤버 선언 순서에 따라 정의하고 초기화하라
 
-Member variables are always initialized in the order they are declared in the class definition, so write them in that order in the constructor initialization list. Writing them in a different order just makes the code confusing because it won't run in the order you see, and that can make it hard to see order-dependent bugs.
+멤버 변수들은 항상 클래스의 정의부에서 선언된 순서에 따라 초기화되므로, 생성자의 초기화리스트에 그 순서대로 작성해야 한다. 다른 순서로 작성하는 것은 멤버 변수들이 눈에 보이는 순서대로 실행되지 않아 순서에 종속적인 버그를 찾기 어렵게 만들며 코드를 헷갈리게할 뿐이다.
 
 ```c++
     class Employee {
@@ -19,14 +19,14 @@ Member variables are always initialized in the order they are declared in the cl
     Employee::Employee(const char* firstName, const char* lastName)
       : first(firstName),
         last(lastName),
-        // BAD: first and last not yet constructed
+        // BAD: first 와 last 가 어직 생성되지 않음
         email(first + "." + last + "@acme.com")
     {}
 ```
 
-In this example, `email` will be constructed before `first` and `last` because it is declared first. That means its constructor will attempt to use `first` and `last` too soon -- not just before they are set to the desired values, but before they are constructed at all.
+이 예제에서 `email`은 맨 처음에 선언되었기 때문에 `first`와 `last` 보다 먼저 생성된다. 그 말은 `first`와 `last`가 원하는 값으로 설정되기 전이 아니라 아예 생성되기도 전에 `email`의 생성자가 사용하려 한다는 뜻이다.
 
-If the class definition and the constructor body are in separate files, the long-distance influence that the order of member variable declarations has over the constructor's correctness will be even harder to spot.
+클래스의 정의부와 생성자 본문이 서로 다른 파일에 있다면, 멤버 변수의 선언 순서가 생성자의 정확성에 미치는 장거리 영향력을 파악하기 훨씬 더 어려워진다.
 
 **References**:
 
@@ -38,18 +38,18 @@ If the class definition and the constructor body are in separate files, the long
 * [\[Murray93\]](#Murray93) §2.1.3
 * [\[Sutter00\]](#Sutter00) §47
 
-### <a name="Sd-init"></a>Discussion: Use of `=`, `{}`, and `()` as initializers
+### <a name="Sd-init"></a>토론: 초기화로 `=`, `{}`, `()` 를 사용하라 
 
 ???
 
-### <a name="Sd-factory"></a>Discussion: Use a factory function if you need "virtual behavior" during initialization
+### <a name="Sd-factory"></a>토론: 초기화 중에 "가상 동작(virtual behavior)"이 필요한 경우 팩토리(factory) 함수를 사용하라
 
-If your design wants virtual dispatch into a derived class from a base class constructor or destructor for functions like `f` and `g`, you need other techniques, such as a post-constructor -- a separate member function the caller must invoke to complete initialization, which can safely call `f` and `g` because in member functions virtual calls behave normally. Some techniques for this are shown in the References. Here's a non-exhaustive list of options:
+`f`와 `g` 같은 함수에 대한 기본 클래스 생성자 또는 소멸자로부터 파생 클래스로 가상 디스패치를 원하는 경우, 다른 기법이 필요하다. 예를 들어 포스트 생성자 기법은 호출자가 초기화를 완료하기 위해 호출해야 하는 별도의 멤버 함수로, 멤버 함수에서는 가상 호출이 정상적으로 작동하므로 `f`와 `g`를 안전하게 호출할 수 있다. 이외에도 몇 가지 기법이 참고 문헌에 나와있다. 다음은 전체가 아닌 옵션 목록이다:
 
-* *Pass the buck:* Just document that user code must call the post-initialization function right after constructing an object.
-* *Post-initialize lazily:* Do it during the first call of a member function. A Boolean flag in the base class tells whether or not post-construction has taken place yet.
-* *Use virtual base class semantics:* Language rules dictate that the constructor most-derived class decides which base constructor will be invoked; you can use that to your advantage. (See [\[Taligent94\]](#Taligent94).)
-* *Use a factory function:* This way, you can easily force a mandatory invocation of a post-constructor function.
+* *책임 전가(Pass the buck):* 사용자 코드가 객체를 생성한 직후에 초기화이 후 함수를 호출해야 한다는 점을 문서화하라
+* *느린 초기화 후(Post-initialize lazily):* 멤버 함수를 처음 호출하는 동안 수행하라. 기본 클래스의 부울 플래그를 통해 객체 생성 후 초기화가 이루어지지 않았는지 여부를 확인하라
+* *가상 기본 클래스 시멘틱 사용(Use virtual base class semantics):* 언어 규칙에 따라 가장 많이 파생된 클래스가 어떤 기본 생성자를 호출할지 결정하므로 이를 유리하게 사용할 수 있다.(See [\[Taligent94\]](#Taligent94).)
+* *팩토리 함수를 사용하라:* 이렇게 하면 생성자 이후 함수의 필수 호출을 쉽게 강제할 수 있다.
 
 Here is an example of the last option:
 
