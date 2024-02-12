@@ -30,13 +30,13 @@
 
 **References**:
 
-* [\[Cline99\]](#Cline99) §22.03-11
-* [\[Dewhurst03\]](#Dewhurst03) §52-53
-* [\[Koenig97\]](#Koenig97) §4
-* [\[Lakos96\]](#Lakos96) §10.3.5
-* [\[Meyers97\]](#Meyers97) §13
-* [\[Murray93\]](#Murray93) §2.1.3
-* [\[Sutter00\]](#Sutter00) §47
+* [\[Cline99\]](../Bibliography.md) §22.03-11
+* [\[Dewhurst03\]](../Bibliography.md) §52-53
+* [\[Koenig97\]](../Bibliography.md) §4
+* [\[Lakos96\]](../Bibliography.md) §10.3.5
+* [\[Meyers97\]](../Bibliography.md) §13
+* [\[Murray93\]](../Bibliography.md) §2.1.3
+* [\[Sutter00\]](../Bibliography.md) §47
 
 ### <a name="Sd-init"></a>토론: 초기화로 `=`, `{}`, `()` 를 사용하라 
 
@@ -48,10 +48,10 @@
 
 * *책임 전가(Pass the buck):* 사용자 코드가 객체를 생성한 직후에 초기화이 후 함수를 호출해야 한다는 점을 문서화하라
 * *느린 초기화 후(Post-initialize lazily):* 멤버 함수를 처음 호출하는 동안 수행하라. 기본 클래스의 부울 플래그를 통해 객체 생성 후 초기화가 이루어지지 않았는지 여부를 확인하라
-* *가상 기본 클래스 시멘틱 사용(Use virtual base class semantics):* 언어 규칙에 따라 가장 많이 파생된 클래스가 어떤 기본 생성자를 호출할지 결정하므로 이를 유리하게 사용할 수 있다.(See [\[Taligent94\]](#Taligent94).)
+* *가상 기본 클래스 시멘틱 사용(Use virtual base class semantics):* 언어 규칙에 따라 가장 많이 파생된 클래스가 어떤 기본 생성자를 호출할지 결정하므로 이를 유리하게 사용할 수 있다.(See [\[Taligent94\]](../Bibliography.md).)
 * *팩토리 함수를 사용하라:* 이렇게 하면 생성자 이후 함수의 필수 호출을 쉽게 강제할 수 있다.
 
-Here is an example of the last option:
+다음은 마지막 옵션의 예시 입니다:
 
 ```c++
     class B {
@@ -66,13 +66,13 @@ Here is an example of the last option:
     class B {
     protected:
         B() { /* ... */ }
-        virtual void post_initialize()    // called right after construction
-            { /* ... */ f(); /* ... */ }   // GOOD: virtual dispatch is safe
+        virtual void post_initialize()    // 생성 직후 호출
+            { /* ... */ f(); /* ... */ }   // GOOD: 가상 디스패치는 안전합니다
     public:
         virtual void f() = 0;
 
         template<class T>
-        static shared_ptr<T> create()    // interface for creating objects
+        static shared_ptr<T> create()    // 객체 생성을 위한 인터페이스
         {
             auto p = make_shared<T>();
             p->post_initialize();
@@ -81,7 +81,7 @@ Here is an example of the last option:
     };
 
 
-    class D : public B {                 // some derived class
+    class D : public B {                 // 일부 파생 클래스
     public:
         void f() override { /* ...  */ };
 
@@ -92,13 +92,13 @@ Here is an example of the last option:
         friend shared_ptr<T> B::Create();
     };
 
-    shared_ptr<D> p = D::Create<D>();    // creating a D object
+    shared_ptr<D> p = D::Create<D>();    // D 객체 생성
 ```
 
-This design requires the following discipline:
+이 설계에는 다음과 같은 원칙이 필요하다:
 
-* Derived classes such as `D` must not expose a public constructor. Otherwise, `D`'s users could create `D` objects that don't invoke `PostInitialize`.
-* Allocation is limited to `operator new`. `B` can, however, override `new` (see Items 45 and 46).
+* `D`와 같은 파생 클래스는 공개 생성자를 노출해서는 안된다. 그렇지 않으면 `D`의 사용자가 `초기화 후 함수(PostInitialize)`를 호출하지 않은 `D`객체를 생성할 수 있다.
+* 할당은 `operator new`로 제한된다. 그러나 `B`는 `new`를 재정의할 수 있다(see Items 45 and 46).
 * `D` must define a constructor with the same parameters that `B` selected. Defining several overloads of `Create` can assuage this problem, however; and the overloads can even be templated on the argument types.
 
 If the requirements above are met, the design guarantees that `PostInitialize` has been called for any fully constructed `B`-derived object. `PostInitialize` doesn't need to be virtual; it can, however, invoke virtual functions freely.
