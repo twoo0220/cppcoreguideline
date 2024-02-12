@@ -48,7 +48,7 @@
 
 * *책임 전가(Pass the buck):* 사용자 코드가 객체를 생성한 직후에 초기화이 후 함수를 호출해야 한다는 점을 문서화하라
 * *느린 초기화 후(Post-initialize lazily):* 멤버 함수를 처음 호출하는 동안 수행하라. 기본 클래스의 부울 플래그를 통해 객체 생성 후 초기화가 이루어지지 않았는지 여부를 확인하라
-* *가상 기본 클래스 시멘틱 사용(Use virtual base class semantics):* 언어 규칙에 따라 가장 많이 파생된 클래스가 어떤 기본 생성자를 호출할지 결정하므로 이를 유리하게 사용할 수 있다.(See [\[Taligent94\]](../Bibliography.md).)
+* *가상 기본 클래스 시멘틱 사용(Use virtual base class semantics):* 언어 규칙에 따라 가장 많이 파생된 클래스가 어떤 기본 생성자를 호출할지 결정하므로 이를 유리하게 사용할 수 있다. ([\[Taligent94\]](../Bibliography.md) 참고)
 * *팩토리 함수를 사용하라:* 이렇게 하면 생성자 이후 함수의 필수 호출을 쉽게 강제할 수 있다.
 
 다음은 마지막 옵션의 예시 입니다:
@@ -99,26 +99,28 @@
 
 * `D`와 같은 파생 클래스는 공개 생성자를 노출해서는 안된다. 그렇지 않으면 `D`의 사용자가 `초기화 후 함수(PostInitialize)`를 호출하지 않은 `D`객체를 생성할 수 있다.
 * 할당은 `operator new`로 제한된다. 그러나 `B`는 `new`를 재정의할 수 있다(see Items 45 and 46).
-* `D` must define a constructor with the same parameters that `B` selected. Defining several overloads of `Create` can assuage this problem, however; and the overloads can even be templated on the argument types.
+* `D`는 `B`가 선택한 것과 동일한 매개변수를 가진 생성자를 정의해야만 한다. 그러나 `Create`의 여러 오버로드를 정의하면서 이 문제를 완화할 수 있으며, 오버로드는 인수 유형에 템플릿을 지정할 수도 있다.  
 
-If the requirements above are met, the design guarantees that `PostInitialize` has been called for any fully constructed `B`-derived object. `PostInitialize` doesn't need to be virtual; it can, however, invoke virtual functions freely.
+위의 요구사항이 충족되면, 설계는 완전히 생성된 모든 `B` 파생 객체에 대해 `PostInitialize`가 호출되었음을 보장한다. `PostInitialize`는 가상일 필요는 없지만 가상 함수를 자유롭게 호출할 수 있어야 한다.
 
-In summary, no post-construction technique is perfect. The worst techniques dodge the whole issue by simply asking the caller to invoke the post-constructor manually. Even the best require a different syntax for constructing objects (easy to check at compile time) and/or cooperation from derived class authors (impossible to check at compile time).
+요약하면, 완벽한 생성 후 기법은 존재하지 않는다. 최악의 기법은 호출자에게 생성자 이후 수동으로 호출하도록 요청함으로써 모든 문제를 회피하는 것이다. 가장 좋은 방법도 객체를 구성하는 다른 구문(컴파일 때 쉽게 확인 가능)이나 파생 클래스 작성자의 협조(컴파일 때 확인 불가능)가 필요하다.
 
 **References**:
 
-* [\[Alexandrescu01\]](#Alexandrescu01) §3
-* [\[Boost\]](#Boost)
-* [\[Dewhurst03\]](#Dewhurst03) §75
-* [\[Meyers97\]](#Meyers97) §46
-* [\[Stroustrup00\]](#Stroustrup00) §15.4.3
-* [\[Taligent94\]](#Taligent94)
+* [\[Alexandrescu01\]](../Bibliography.md) §3
+* [\[Boost\]](../Bibliography.md)
+* [\[Dewhurst03\]](../Bibliography.md) §75
+* [\[Meyers97\]](../Bibliography.md) §46
+* [\[Stroustrup00\]](../Bibliography.md) §15.4.3
+* [\[Taligent94\]](../Bibliography.md)
 
-### <a name="Sd-dtor"></a>Discussion: Make base class destructors public and virtual, or protected and nonvirtual
+### <a name="Sd-dtor"></a>토론: 기본 클래스 소멸자를 공개, 가상 또는 보호 및 비가상으로 설정하라
 
-Should destruction behave virtually? That is, should destruction through a pointer to a `base` class be allowed? If yes, then `base`'s destructor must be public in order to be callable, and virtual otherwise calling it results in undefined behavior. Otherwise, it should be protected so that only derived classes can invoke it in their own destructors, and nonvirtual since it doesn't need to behave virtually virtual.
+소멸이 가상으로 작동해야만 하는가? 즉, `base` 클래스에 대한 포인터를 통한 소멸이 허용되어야 하는가?  
+위 질문에 대한 대답이 '그렇다' 라면, `base` 의 소멸자는 호출 가능해야 하고 그렇지 않으면 가상으로 호출하면 정의되지 않은 동작이 발생한다.  
+대답이 '아니오' 라면, 파생 클래스만 자체 소멸자에서 호출할 수 있도록 보호해야 하며, 가상으로 동작할 필요가 없으므로 비가상이어야 한다.
 
-##### Example
+##### 예제
 
 The common case for a base class is that it's intended to have publicly derived classes, and so calling code is just about sure to use something like a `shared_ptr<base>`:
 
