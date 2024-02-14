@@ -97,7 +97,7 @@
 
 이 설계에는 다음과 같은 원칙이 필요하다:
 
-* `D`와 같은 파생 클래스는 공개 생성자를 노출해서는 안된다. 그렇지 않으면 `D`의 사용자가 `초기화 후 함수(PostInitialize)`를 호출하지 않은 `D`객체를 생성할 수 있다.
+* `D`와 같은 파생 클래스는 public 생성자를 노출해서는 안된다. 그렇지 않으면 `D`의 사용자가 `초기화 후 함수(PostInitialize)`를 호출하지 않은 `D`객체를 생성할 수 있다.
 * 할당은 `operator new`로 제한된다. 그러나 `B`는 `new`를 재정의할 수 있다(see Items 45 and 46).
 * `D`는 `B`가 선택한 것과 동일한 매개변수를 가진 생성자를 정의해야만 한다. 그러나 `Create`의 여러 오버로드를 정의하면서 이 문제를 완화할 수 있으며, 오버로드는 인수 유형에 템플릿을 지정할 수도 있다.  
 
@@ -122,12 +122,12 @@
 
 ##### 예제
 
-The common case for a base class is that it's intended to have publicly derived classes, and so calling code is just about sure to use something like a `shared_ptr<base>`:
+기본 클래스는 보통 공개적으로 파생된 클래스를 갖기 위한 것이므로 코드를 호출할 때 `shared_ptr<base>`와 같은 것을 사용해야 한다:
 
 ```c++
     class Base {
     public:
-        ~Base();                   // BAD, not virtual
+        ~Base();                   // BAD, 비가상
         virtual ~Base();           // GOOD
         // ...
     };
@@ -137,22 +137,22 @@ The common case for a base class is that it's intended to have publicly derived 
     {
         unique_ptr<Base> pb = make_unique<Derived>();
         // ...
-    } // ~pb invokes correct destructor only when ~Base is virtual
+    } // ~Base 가 가상인 경우에만 ~pb가 올바른 소멸자를 호출
 ```
 
-In rarer cases, such as policy classes, the class is used as a base class for convenience, not for polymorphic behavior. It is recommended to make those destructors protected and nonvirtual:
+단위 전략(policy) 클래스와 같이 드문 경우에 다형성 동작이 아닌 편의상 기본 클래스로 사용된다. 이러한 소멸자는 protected와 비가상으로 만드는 것이 좋다:
 
 ```c++
     class My_policy {
     public:
-        virtual ~My_policy();      // BAD, public and virtual
+        virtual ~My_policy();      // BAD, public 과 virtual
     protected:
         ~My_policy();              // GOOD
         // ...
     };
 
     template<class Policy>
-    class customizable : Policy { /* ... */ }; // note: private inheritance
+    class customizable : Policy { /* ... */ }; // note: private 상속
 ```
 
 ##### Note
