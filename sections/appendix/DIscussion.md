@@ -157,16 +157,16 @@
 
 ##### Note
 
-This simple guideline illustrates a subtle issue and reflects modern uses of inheritance and object-oriented design principles.
+이 간단한 가이드라인은 미묘한 문제를 설명하며 상속 및 객체 지향 설계 원칙의 현대적인 사용을 반영한다.
 
-For a base class `Base`, calling code might try to destroy derived objects through pointers to `Base`, such as when using a `unique_ptr<Base>`. If `Base`'s destructor is public and nonvirtual (the default), it can be accidentally called on a pointer that actually points to a derived object, in which case the behavior of the attempted deletion is undefined. This state of affairs has led older coding standards to impose a blanket requirement that all base class destructors must be virtual. This is overkill (even if it is the common case); instead, the rule should be to make base class destructors virtual if and only if they are public.
+기본 클래스 `Base`의 경우, `unique_ptr<Base>`를 사용할 때와 같이 호출 코드가 `Base`에 대한 포인터를 통해 파생 객체를 삭제하려 할 수 있다. `Base`의 소멸자가 public이고 비가상인 경우(기본값), 실제로 파생 객체를 가리키는 포인터에서 실수로 호출될 수 있으며, 이 경우 삭제 시도의 동작이 정의되지 않는다. 이러한 상황으로 인해 이전 코딩 표준에서는 모든 기본 클래스 소멸자가 가상이어야 한다는 포괄적인 요건을 부과했다. 이것은 (일반적인 경우라고 해도) 지나친 요구다. 대신 기본 클래스 소멸자가 public인 경우에만 가상으로 만드는 것으로 규칙을 만들어야 한다.
 
-To write a base class is to define an abstraction (see Items 35 through 37). Recall that for each member function participating in that abstraction, you need to decide:
+기본 클래스를 만드는 것은 추상화를 정의하는 것이다(Items 35 ~ 37 참조). 해당 추상화에 참여하는 각 멤버 함수에 대해 결정해야 한다는 점을 상기하라:
 
-* Whether it should behave virtually or not.
-* Whether it should be publicly available to all callers using a pointer to `Base` or else be a hidden internal implementation detail.
+* 가상으로 동작해야 하는지 여부.
+* `Base`에 대한 포인터를 사용하여 모든 호출자가 공개적으로 사용할 수 있어야 하는지 아니면 숨겨진 내부 구현 세부 사항이어야 하는지 여부
 
-As described in Item 39, for a normal member function, the choice is between allowing it to be called via a pointer to `Base` nonvirtually (but possibly with virtual behavior if it invokes virtual functions, such as in the NVI or Template Method patterns), virtually, or not at all. The NVI pattern is a technique to avoid public virtual functions.
+Item 39에 설명된 대로, 일반 멤버 함수의 경우, `Base`에 대한 포인터를 통해 호출할 수 있도록 허용할지, 가상 함수를 호출하는 경우 가상 동작을 포함할지(NVI 또는 템플릿 메서드 패턴과 같이 가상 함수를 호출하는 경우), 가상으로 호출할지 또는 전혀 호출하지 않을지 선택할 수 있다. NVI 패턴은 public 가상 함수를 피하기 위한 기법이다.(NVI : Non-virtual-interface)
 
 Destruction can be viewed as just another operation, albeit with special semantics that make nonvirtual calls dangerous or wrong. For a base class destructor, therefore, the choice is between allowing it to be called via a pointer to `Base` virtually or not at all; "nonvirtually" is not an option. Hence, a base class destructor is virtual if it can be called (i.e., is public), and nonvirtual otherwise.
 
