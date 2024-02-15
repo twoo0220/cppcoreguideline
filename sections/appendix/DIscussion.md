@@ -168,13 +168,13 @@
 
 Item 39에 설명된 대로, 일반 멤버 함수의 경우, `Base`에 대한 포인터를 통해 호출할 수 있도록 허용할지, 가상 함수를 호출하는 경우 가상 동작을 포함할지(NVI 또는 템플릿 메서드 패턴과 같이 가상 함수를 호출하는 경우), 가상으로 호출할지 또는 전혀 호출하지 않을지 선택할 수 있다. NVI 패턴은 public 가상 함수를 피하기 위한 기법이다.(NVI : Non-virtual-interface)
 
-Destruction can be viewed as just another operation, albeit with special semantics that make nonvirtual calls dangerous or wrong. For a base class destructor, therefore, the choice is between allowing it to be called via a pointer to `Base` virtually or not at all; "nonvirtually" is not an option. Hence, a base class destructor is virtual if it can be called (i.e., is public), and nonvirtual otherwise.
+소멸은 비가상 호출을 위험하거나 잘못되게 만드는 특별한 시맨틱(semantics)이 있긴 하지만, 또 다른 연산으로 볼 수 있다. 그러므로 기본 클래스 소멸자의 경우, `Base`에 대한 포인터를 통해 가상으로 호출할 수 있는지 아니면 전혀 호출할 수 없는지를 선택해야 하며, "비가상"은 옵션이 아니다. 이런 이유로 기본 클래스 소멸자는 호출할 수 있는 경우(즉, public인 경우) 가상이고, 그렇지 않은 경우 비가상이다.
 
-Note that the NVI pattern cannot be applied to the destructor because constructors and destructors cannot make deep virtual calls. (See Items 39 and 55.)
+생성자와 소멸자는 심층 가상 호출을 할 수 없으므로 소멸자에는 NVI 패턴을 적용할 수 없다.(Items 39 및 55 참조.)
 
-Corollary: When writing a base class, always write a destructor explicitly, because the implicitly generated one is public and nonvirtual. You can always `=default` the implementation if the default body is fine and you're just writing the function to give it the proper visibility and virtuality.
+결론: 기본 클래스를 작성할 때는 항상 소멸자를 명시적으로 작성하라. 암시적으로 생성된 소멸자는 public이고 비가상이기 떄문이다. 기본 형태가 괜찮고 적절한 가시성과 가상성을 제공하는 함수를 작성하는 경우 언제든지 구현을 `=default`로 설정할 수 있다.
 
-##### Exception
+##### 예외
 
 Some component architectures (e.g., COM and CORBA) don't use a standard deletion mechanism, and foster different protocols for object disposal. Follow the local patterns and idioms, and adapt this guideline as appropriate.
 
