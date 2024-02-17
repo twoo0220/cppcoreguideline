@@ -44,11 +44,11 @@
 
 ### <a name="Sd-factory"></a>토론: 초기화 중에 "가상 동작(virtual behavior)"이 필요한 경우 팩토리(factory) 함수를 사용하라
 
-`f`와 `g` 같은 함수에 대한 기본 클래스 생성자 또는 소멸자로부터 파생 클래스로 가상 디스패치를 원하는 경우, 다른 기법이 필요하다. 예를 들어 포스트 생성자 기법은 호출자가 초기화를 완료하기 위해 호출해야 하는 별도의 멤버 함수로, 멤버 함수에서는 가상 호출이 정상적으로 작동하므로 `f`와 `g`를 안전하게 호출할 수 있다. 이외에도 몇 가지 기법이 참고 문헌에 나와있다. 다음은 전체가 아닌 옵션 목록이다:
+`f`와 `g` 같은 함수에 대한 기반 클래스 생성자 또는 소멸자로부터 파생 클래스로 가상 디스패치를 원하는 경우, 다른 기법이 필요하다. 예를 들어 포스트 생성자 기법은 호출자가 초기화를 완료하기 위해 호출해야 하는 별도의 멤버 함수로, 멤버 함수에서는 가상 호출이 정상적으로 작동하므로 `f`와 `g`를 안전하게 호출할 수 있다. 이외에도 몇 가지 기법이 참고 문헌에 나와있다. 다음은 전체가 아닌 옵션 목록이다:
 
 * *책임 전가(Pass the buck):* 사용자 코드가 객체를 생성한 직후에 초기화이 후 함수를 호출해야 한다는 점을 문서화하라
-* *느린 초기화 후(Post-initialize lazily):* 멤버 함수를 처음 호출하는 동안 수행하라. 기본 클래스의 부울 플래그를 통해 객체 생성 후 초기화가 이루어지지 않았는지 여부를 확인하라
-* *가상 기본 클래스 시멘틱 사용(Use virtual base class semantics):* 언어 규칙에 따라 가장 많이 파생된 클래스가 어떤 기본 생성자를 호출할지 결정하므로 이를 유리하게 사용할 수 있다. ([\[Taligent94\]](../Bibliography.md) 참고)
+* *느린 초기화 후(Post-initialize lazily):* 멤버 함수를 처음 호출하는 동안 수행하라. 기반 클래스의 부울 플래그를 통해 객체 생성 후 초기화가 이루어지지 않았는지 여부를 확인하라
+* *가상 기반 클래스 시멘틱 사용(Use virtual base class semantics):* 언어 규칙에 따라 가장 많이 파생된 클래스가 어떤 기본 생성자를 호출할지 결정하므로 이를 유리하게 사용할 수 있다. ([\[Taligent94\]](../Bibliography.md) 참고)
 * *팩토리 함수를 사용하라:* 이렇게 하면 생성자 이후 함수의 필수 호출을 쉽게 강제할 수 있다.
 
 다음은 마지막 옵션의 예시 입니다:
@@ -114,7 +114,7 @@
 * [\[Stroustrup00\]](../Bibliography.md) §15.4.3
 * [\[Taligent94\]](../Bibliography.md)
 
-### <a name="Sd-dtor"></a>토론: 기본 클래스 소멸자를 공개, 가상 또는 보호 및 비가상으로 설정하라
+### <a name="Sd-dtor"></a>토론: 기반 클래스 소멸자를 공개, 가상 또는 보호 및 비가상으로 설정하라
 
 소멸이 가상으로 작동해야만 하는가? 즉, `base` 클래스에 대한 포인터를 통한 소멸이 허용되어야 하는가?  
 위 질문에 대한 대답이 '그렇다' 라면, `base` 의 소멸자는 호출 가능해야 하고 그렇지 않으면 가상으로 호출하면 정의되지 않은 동작이 발생한다.  
@@ -122,7 +122,7 @@
 
 ##### 예제
 
-기본 클래스는 보통 공개적으로 파생된 클래스를 갖기 위한 것이므로 코드를 호출할 때 `shared_ptr<base>`와 같은 것을 사용해야 한다:
+기반 클래스는 보통 공개적으로 파생된 클래스를 갖기 위한 것이므로 코드를 호출할 때 `shared_ptr<base>`와 같은 것을 사용해야 한다:
 
 ```c++
     class Base {
@@ -140,7 +140,7 @@
     } // ~Base 가 가상인 경우에만 ~pb가 올바른 소멸자를 호출
 ```
 
-단위 전략(policy) 클래스와 같이 드문 경우에 다형성 동작이 아닌 편의상 기본 클래스로 사용된다. 이러한 소멸자는 protected와 비가상으로 만드는 것이 좋다:
+단위 전략(policy) 클래스와 같이 드문 경우에 다형성 동작이 아닌 편의상 기반 클래스로 사용된다. 이러한 소멸자는 protected와 비가상으로 만드는 것이 좋다:
 
 ```c++
     class My_policy {
@@ -159,57 +159,56 @@
 
 이 간단한 가이드라인은 미묘한 문제를 설명하며 상속 및 객체 지향 설계 원칙의 현대적인 사용을 반영한다.
 
-기본 클래스 `Base`의 경우, `unique_ptr<Base>`를 사용할 때와 같이 호출 코드가 `Base`에 대한 포인터를 통해 파생 객체를 삭제하려 할 수 있다. `Base`의 소멸자가 public이고 비가상인 경우(기본값), 실제로 파생 객체를 가리키는 포인터에서 실수로 호출될 수 있으며, 이 경우 삭제 시도의 동작이 정의되지 않는다. 이러한 상황으로 인해 이전 코딩 표준에서는 모든 기본 클래스 소멸자가 가상이어야 한다는 포괄적인 요건을 부과했다. 이것은 (일반적인 경우라고 해도) 지나친 요구다. 대신 기본 클래스 소멸자가 public인 경우에만 가상으로 만드는 것으로 규칙을 만들어야 한다.
+기반 클래스 `Base`의 경우, `unique_ptr<Base>`를 사용할 때와 같이 호출 코드가 `Base`에 대한 포인터를 통해 파생 객체를 삭제하려 할 수 있다. `Base`의 소멸자가 public이고 비가상인 경우(기본값), 실제로 파생 객체를 가리키는 포인터에서 실수로 호출될 수 있으며, 이 경우 삭제 시도의 동작이 정의되지 않는다. 이러한 상황으로 인해 이전 코딩 표준에서는 모든 기반 클래스 소멸자가 가상이어야 한다는 포괄적인 요건을 부과했다. 이것은 (일반적인 경우라고 해도) 지나친 요구다. 대신 기반 클래스 소멸자가 public인 경우에만 가상으로 만드는 것으로 규칙을 만들어야 한다.
 
-기본 클래스를 만드는 것은 추상화를 정의하는 것이다(Items 35 ~ 37 참조). 해당 추상화에 참여하는 각 멤버 함수에 대해 결정해야 한다는 점을 상기하라:
+기반 클래스를 만드는 것은 추상화를 정의하는 것이다(Items 35 ~ 37 참조). 해당 추상화에 참여하는 각 멤버 함수에 대해 결정해야 한다는 점을 상기하라:
 
 * 가상으로 동작해야 하는지 여부.
 * `Base`에 대한 포인터를 사용하여 모든 호출자가 공개적으로 사용할 수 있어야 하는지 아니면 숨겨진 내부 구현 세부 사항이어야 하는지 여부
 
 Item 39에 설명된 대로, 일반 멤버 함수의 경우, `Base`에 대한 포인터를 통해 호출할 수 있도록 허용할지, 가상 함수를 호출하는 경우 가상 동작을 포함할지(NVI 또는 템플릿 메서드 패턴과 같이 가상 함수를 호출하는 경우), 가상으로 호출할지 또는 전혀 호출하지 않을지 선택할 수 있다. NVI 패턴은 public 가상 함수를 피하기 위한 기법이다.(NVI : Non-virtual-interface)
 
-소멸은 비가상 호출을 위험하거나 잘못되게 만드는 특별한 시맨틱(semantics)이 있긴 하지만, 또 다른 연산으로 볼 수 있다. 그러므로 기본 클래스 소멸자의 경우, `Base`에 대한 포인터를 통해 가상으로 호출할 수 있는지 아니면 전혀 호출할 수 없는지를 선택해야 하며, "비가상"은 옵션이 아니다. 이런 이유로 기본 클래스 소멸자는 호출할 수 있는 경우(즉, public인 경우) 가상이고, 그렇지 않은 경우 비가상이다.
+소멸은 비가상 호출을 위험하거나 잘못되게 만드는 특별한 시맨틱(semantics)이 있긴 하지만, 또 다른 연산으로 볼 수 있다. 그러므로 기반 클래스 소멸자의 경우, `Base`에 대한 포인터를 통해 가상으로 호출할 수 있는지 아니면 전혀 호출할 수 없는지를 선택해야 하며, "비가상"은 옵션이 아니다. 이런 이유로 기반 클래스 소멸자는 호출할 수 있는 경우(즉, public인 경우) 가상이고, 그렇지 않은 경우 비가상이다.
 
 생성자와 소멸자는 심층 가상 호출을 할 수 없으므로 소멸자에는 NVI 패턴을 적용할 수 없다.(Items 39 및 55 참조.)
 
-결론: 기본 클래스를 작성할 때는 항상 소멸자를 명시적으로 작성하라. 암시적으로 생성된 소멸자는 public이고 비가상이기 떄문이다. 기본 형태가 괜찮고 적절한 가시성과 가상성을 제공하는 함수를 작성하는 경우 언제든지 구현을 `=default`로 설정할 수 있다.
+결론: 기반 클래스를 작성할 때는 항상 소멸자를 명시적으로 작성하라. 암시적으로 생성된 소멸자는 public이고 비가상이기 떄문이다. 기본 형태가 괜찮고 적절한 가시성과 가상성을 제공하는 함수를 작성하는 경우 언제든지 구현을 `=default`로 설정할 수 있다.
 
 ##### 예외
 
-Some component architectures (e.g., COM and CORBA) don't use a standard deletion mechanism, and foster different protocols for object disposal. Follow the local patterns and idioms, and adapt this guideline as appropriate.
+일부 컴포넌트 아키텍처(예: COM 및 CORBA)는 표준 삭제 메커니즘을 사용하지 않으며, 객체 처리를 위해 다른 프로토콜을 장려한다. 로컬 패턴(local pattern)과 관용구를 따르고 이 가이드라인을 적절히 적용하라.
 
-Consider also this rare case:
+또한 다음과 같이 드문 경우들도 고려하라:
 
-* `B` is both a base class and a concrete class that can be instantiated by itself, and so the destructor must be public for `B` objects to be created and destroyed.
-* Yet `B` also has no virtual functions and is not meant to be used polymorphically, and so although the destructor is public it does not need to be virtual.
+* `B`는 기반 클래스인 동시에 그 자체로 인스턴스화할 수 있는 구체적인 클래스이므로 `B` 객체를 생성하고 소멸하려면 소멸자가 public이어야 한다.
 
-Then, even though the destructor has to be public, there can be great pressure to not make it virtual because as the first virtual function it would incur all the run-time type overhead when the added functionality should never be needed.
+소멸자가 public이 되어야 하더라도, 첫 번째 가상 함수로서 추가 기능이 필요하지 않은데도 모든 런타임 유형 오버헤드가 발생하기 때문에 가상으로 만들지 않는 것이 큰 부담이 될 수 있다.
 
-In this rare case, you could make the destructor public and nonvirtual but clearly document that further-derived objects must not be used polymorphically as `B`'s. This is what was done with `std::unary_function`.
+드문 경우지만, 소멸자를 public이고 비가상으로 만들되, 추가 파생 객체를 `B`처럼 다형성으로 사용해서는 안 된다는 점을 명확하게 문서화할 수 있다. 이것이 `std::unary_function`으로 수행한 작업이다.
 
-In general, however, avoid concrete base classes (see Item 35). For example, `unary_function` is a bundle-of-typedefs that was never intended to be instantiated standalone. It really makes no sense to give it a public destructor; a better design would be to follow this Item's advice and give it a protected nonvirtual destructor.
+그러나 일반적으로 구체적인 기반 클래스는 피하라(Item 35 참조). 예를 들어, `unary_function`은 독립적으로 인스턴스화되도록 의도되지 않은 타입 정의 번들이다. 이 항목의 조언을 따르고 protected, 비가상 소멸자를 제공하는 것이 더 나은 설계이다.
 
 **References**:
 
-* [\[C++CS\]](#CplusplusCS) Item 50
-* [\[Cargill92\]](#Cargill92) pp. 77-79, 207
-* [\[Cline99\]](#Cline99) §21.06, 21.12-13
-* [\[Henricson97\]](#Henricson97) pp. 110-114
-* [\[Koenig97\]](#Koenig97) Chapters 4, 11
-* [\[Meyers97\]](#Meyers97) §14
-* [\[Stroustrup00\]](#Stroustrup00) §12.4.2
-* [\[Sutter02\]](#Sutter02) §27
-* [\[Sutter04\]](#Sutter04) §18
+* [\[C++CS\]](../Bibliography.md) Item 50
+* [\[Cargill92\]](../Bibliography.md) pp. 77-79, 207
+* [\[Cline99\]](../Bibliography.md) §21.06, 21.12-13
+* [\[Henricson97\]](../Bibliography.md) pp. 110-114
+* [\[Koenig97\]](../Bibliography.md) Chapters 4, 11
+* [\[Meyers97\]](../Bibliography.md) §14
+* [\[Stroustrup00\]](../Bibliography.md) §12.4.2
+* [\[Sutter02\]](../Bibliography.md) §27
+* [\[Sutter04\]](../Bibliography.md) §18
 
-### <a name="Sd-noexcept"></a>Discussion: Usage of noexcept
+### <a name="Sd-noexcept"></a>토론: noexcept 사용
 
 ???
 
-### <a name="Sd-never-fail"></a>Discussion: Destructors, deallocation, and swap must never fail
+### <a name="Sd-never-fail"></a>토론: 소멸자, 할당 해제, 스왑(swap)은 절대 실패해서는 안 된다
 
 Never allow an error to be reported from a destructor, a resource deallocation function (e.g., `operator delete`), or a `swap` function using `throw`. It is nearly impossible to write useful code if these operations can fail, and even if something does go wrong it nearly never makes any sense to retry. Specifically, types whose destructors may throw an exception are flatly forbidden from use with the C++ Standard Library. Most destructors are now implicitly `noexcept` by default.
 
-##### Example
+##### 예제
 
 ```c++
     class Nefarious {
