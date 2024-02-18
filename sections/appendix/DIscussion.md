@@ -56,50 +56,63 @@
 ```c++
     class B {
     public:
-        B() { /* ... */ f(); /* ... */ }   // BAD: see Item 49.1
+        B()
+        {
+            /* ... */
+            f(); // BAD: C.82: 생성자 및 소멸자에서 가상 함수를 호출하지 마라
+            /* ... */
+        }
 
         virtual void f() = 0;
-
-        // ...
     };
 
     class B {
     protected:
-        B() { /* ... */ }
-        virtual void post_initialize()    // 생성 직후 호출
-            { /* ... */ f(); /* ... */ }   // GOOD: 가상 디스패치는 안전합니다
+        class Token {};
+
     public:
+        // 생성자는 make_shared가 접근할 수 있도록 public이어야 한다.
+        // protected 접근 수준은 Token을 요구하여 얻을 수 있다.
+        explicit B(Token) { /* ... */ } // 불완전하게 초기화된 객체 생성
         virtual void f() = 0;
 
         template<class T>
         static shared_ptr<T> create()    // 객체 생성을 위한 인터페이스
         {
-            auto p = make_shared<T>();
+            auto p = make_shared<T>(typename T::Token{});
             p->post_initialize();
             return p;
         }
+
+    protected:
+        virtual void post_initialize()    // 생성 직후 호출
+            { /* ... */ f(); /* ... */ }   // GOOD: 가상 디스패치는 안전합니다
     };
 
 
     class D : public B {                 // 일부 파생 클래스
+    protected:
+        class Token {};
+
     public:
+        // 생성자는 make_shared가 접근할 수 있도록 public이어야 한다.
+        // protected 접근 수준은 Token을 요구하여 얻을 수 있다.
+        explicit D(Token) : B{ B::Token{} } {}
         void f() override { /* ...  */ };
 
     protected:
-        D() {}
-
         template<class T>
-        friend shared_ptr<T> B::Create();
+        friend shared_ptr<T> B::create();
     };
 
-    shared_ptr<D> p = D::Create<D>();    // D 객체 생성
+    shared_ptr<D> p = D::create<D>();    // D 객체 생성
 ```
 
 이 설계에는 다음과 같은 원칙이 필요하다:
 
-* `D`와 같은 파생 클래스는 public 생성자를 노출해서는 안된다. 그렇지 않으면 `D`의 사용자가 `초기화 후 함수(PostInitialize)`를 호출하지 않은 `D`객체를 생성할 수 있다.
-* 할당은 `operator new`로 제한된다. 그러나 `B`는 `new`를 재정의할 수 있다(see Items 45 and 46).
-* `D`는 `B`가 선택한 것과 동일한 매개변수를 가진 생성자를 정의해야만 한다. 그러나 `Create`의 여러 오버로드를 정의하면서 이 문제를 완화할 수 있으며, 오버로드는 인수 유형에 템플릿을 지정할 수도 있다.  
+* `D`와 같은 파생 클래스는 공개적으로 호출 가능한 생성자를 노출해서는 안된다. 그렇지 않으면 `D`의 사용자가 `초기화 후 함수(PostInitialize)`를 호출하지 않은 `D`객체를 생성할 수 있다.
+* 할당은 `operator new`로 제한된다. 그러나 `B`는 `new`를 재정의할 수 있다([SuttAlex05](../Bibliography.md)의 Items 45 and 46 참조).
+* `D`는 `B`가 선택한 것과 동일한 매개변수를 가진 생성자를 정의해야만 한다. 그러나 `create`의 여러 오버로드를 정의하면서 이 문제를 완화할 수 있으며, 오버로드는 인수 유형에 템플릿을 지정할 수도 있다.  
 
 위의 요구사항이 충족되면, 설계는 완전히 생성된 모든 `B` 파생 객체에 대해 `PostInitialize`가 호출되었음을 보장한다. `PostInitialize`는 가상일 필요는 없지만 가상 함수를 자유롭게 호출할 수 있어야 한다.
 
@@ -287,7 +300,8 @@ Deallocation functions, including specifically overloaded `operator delete` and 
 Besides destructors and deallocation functions, common error-safety techniques rely also on `swap` operations never failing -- in this case, not because they are used to implement a guaranteed rollback, but because they are used to implement a guaranteed commit. For example, here is an idiomatic implementation of `operator=` for a type `T` that performs copy construction followed by a call to a no-fail `swap`:
 
 ```c++
-    T& T::operator=(const T& other) {
+    T& T::operator=(const T& other)
+    {
         auto temp = other;
         swap(temp);
         return *this;
@@ -436,7 +450,7 @@ This class is a resource handle. It manages the lifetime of the `T`s. To do so, 
 
 The basic technique for preventing leaks is to have every resource owned by a resource handle with a suitable destructor. A checker can find "naked `new`s". Given a list of C-style allocation functions (e.g., `fopen()`), a checker can also find uses that are not managed by a resource handle. In general, "naked pointers" can be viewed with suspicion, flagged, and/or analyzed. A complete list of resources cannot be generated without human input (the definition of "a resource" is necessarily too general), but a tool can be "parameterized" with a resource list.
 
-### <a name="Cr-never"></a>Discussion: Never throw while holding a resource not owned by a handle
+### <a name="Cr-never"></a>Discussion: Never return or throw while holding a resource not owned by a handle
 
 ##### Reason
 
