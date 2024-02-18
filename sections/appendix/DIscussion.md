@@ -219,60 +219,61 @@ Item 39에 설명된 대로, 일반 멤버 함수의 경우, `Base`에 대한 �
 
 ### <a name="Sd-never-fail"></a>토론: 소멸자, 할당 해제, 스왑(swap)은 절대 실패해서는 안 된다
 
-Never allow an error to be reported from a destructor, a resource deallocation function (e.g., `operator delete`), or a `swap` function using `throw`. It is nearly impossible to write useful code if these operations can fail, and even if something does go wrong it nearly never makes any sense to retry. Specifically, types whose destructors may throw an exception are flatly forbidden from use with the C++ Standard Library. Most destructors are now implicitly `noexcept` by default.
+소멸자, 리소스 할당 해제 함수(예: `delete 연산자`) 또는 `throw`를 사용하는 `swap` 함수에서 오류가 보고되는 것을 허용하지 마라. 이러한 연산이 실패할 수 있는 경우 유용한 코드를 작성하는 것은 거의 불가능하며, 문제가 발생하더라도 재시도하는 것은 거의 의미가 없다. 특히 소멸자가 예외를 던질 수 있는 타입은 C++ 표준 라이브러리에서 사용이 전면적으로 금지되어 있다. 현재 대부분의 소멸자는 암시적으로 기본값이 `noexcept`이다.
 
 ##### 예제
+- `Nefarious` : 비난의 뜻이 강한 말로, 법이나 전통의 위반을 암시하고, 보통 극도로 사악한 것을 의미
 
 ```c++
     class Nefarious {
     public:
-        Nefarious()  { /* code that could throw */ }   // ok
-        ~Nefarious() { /* code that could throw */ }   // BAD, should not throw
+        Nefarious()  { /* 예외를 던질 수 있는 코드 */ }   // ok
+        ~Nefarious() { /* 예외를 던질 수 있는 코드 */ }   // BAD, 예외를 던져서는 안된다
         // ...
     };
 ```
 
-1. `Nefarious` objects are hard to use safely even as local variables:
+1. `Nefarious` 객체는 지역 변수로도 안전하게 사용하기 어렵다:
 
 ```c++
         void test(string& s)
         {
-            Nefarious n;          // trouble brewing
-            string copy = s;      // copy the string
-        } // destroy copy and then n
+            Nefarious n;          // 점점 더 심각해지는 문제(trouble brewing)
+            string copy = s;      // 문자열 복사
+        } // copy 파과한 다음 n
 ```
 
-Here, copying `s` could throw, and if that throws and if `n`'s destructor then also throws, the program will exit via `std::terminate` because two exceptions can't be propagated simultaneously.
+여기, `s`를 복사하면 예외가 발생하고, `n`의 소멸자도 예외가 발생하면 두 예외가 동시에 전파될 수 없으므로 `std::terminate`를 통해 프로그램이 종료된다.  
 
-2. Classes with `Nefarious` members or bases are also hard to use safely, because their destructors must invoke `Nefarious`' destructor, and are similarly poisoned by its poor behavior:
+2. `Nefarious` 멤버나 기반으로 한 클래스 역시 소멸자가 반드시 `Nefarious`의 소멸자를 호출해야 하며, 마찬가지로 동작이 좋지 않아 안전하게 사용하기 어렵다:  
 
 ```c++
     class Innocent_bystander {
-        Nefarious member;     // oops, poisons the enclosing class's destructor
+        Nefarious member;     // 이런, 클래스의 소멸자를 둘러싼 독과 같습니다
         // ...
     };
 
     void test(string& s)
     {
-        Innocent_bystander i; // more trouble brewing
-        string copy2 = s;      // copy the string
-    } // destroy copy and then i
+        Innocent_bystander i;   // 훨씬 더 심각해지는 문제(more trouble brewing)
+        string copy2 = s;       // 문자열 복사
+    } // copy 파괴한 다음 i
 ```
 
-Here, if constructing `copy2` throws, we have the same problem because `i`'s destructor now also can throw, and if so we'll invoke `std::terminate`.
+여기서 `copy`를 생성하면 `i`의 소멸자도 던질 수 있기 때문에 같은 문제가 발생하고, 그렇다면 `std::terminate`를 호출하게 된다.  
 
-3. You can't reliably create global or static `Nefarious` objects either:
+3. 전역 또는 정적 `Nefarious` 객체도 안정적으로 생성할 수 없다:
 
 ```c++
-    static Nefarious n;       // oops, any destructor exception can't be caught
+    static Nefarious n;       // 이런, 어떤 소멸자 예외도 잡을 수 없습니다
 ```
 
-4. You can't reliably create arrays of `Nefarious`:
+4. `Nefarious` 배열을 안정적으로 생성할 수 없다:
 
 ```c++
     void test()
     {
-        std::array<Nefarious, 10> arr; // this line can std::terminate(!)
+        std::array<Nefarious, 10> arr; // 이 줄에서 std::terminate(!)가 가능합니다
     }
 ```
 
