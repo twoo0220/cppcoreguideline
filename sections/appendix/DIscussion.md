@@ -277,15 +277,15 @@ Item 39에 설명된 대로, 일반 멤버 함수의 경우, `Base`에 대한 �
     }
 ```
 
-The behavior of arrays is undefined in the presence of destructors that throw because there is no reasonable rollback behavior that could ever be devised. Just think: What code can the compiler generate for constructing an `arr` where, if the fourth object's constructor throws, the code has to give up and in its cleanup mode tries to call the destructors of the already-constructed objects ... and one or more of those destructors throws? There is no satisfactory answer.
+배열의 동작은 소멸자가 존재할 때 정의되지 않는데, 그 이유는 고안할 수 있는 합리적인 롤백 동작이 없기 때문이다. 생각해보자: 4번째 객체의 생성자가 예외를 던지면 코드가 포기하고 정리 모드에서 이미 생성된 객체의 소멸자를 호출하려고 시도하고 그 소멸자 중 하나 이상이 예외를 던지는 `arr`를 생성하기 위해 컴파일러가 생성할 수 있는 코드는 무엇인가? 여기에 만족할만한 정답은 없다.
 
-5. You can't use `Nefarious` objects in standard containers:
+5. 표준 컨테이너에서는 `Nefarious` 객체를 사용할 수 없다:
 
 ```c++
-    std::vector<Nefarious> vec(10);   // this line can std::terminate()
+    std::vector<Nefarious> vec(10);   // 이 줄에서 std::terminate()가 가능합니다
 ```
 
-The standard library forbids all destructors used with it from throwing. You can't store `Nefarious` objects in standard containers or use them with any other part of the standard library.
+표준 라이브러리에서는 함께 사용되는 모든 소멸자가 예외를 던지는 것을 금지하고 있다. 표준 컨테이너에 `Nefarious` 객체를 저장하거나 표준 라이브러리의 다른 부분과 함께 사용할 수 없다.
 
 ##### Note
 
