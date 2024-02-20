@@ -289,11 +289,11 @@ Item 39에 설명된 대로, 일반 멤버 함수의 경우, `Base`에 대한 �
 
 ##### Note
 
-These are key functions that must not fail because they are necessary for the two key operations in transactional programming: to back out work if problems are encountered during processing, and to commit work if no problems occur. If there's no way to safely back out using no-fail operations, then no-fail rollback is impossible to implement. If there's no way to safely commit state changes using a no-fail operation (notably, but not limited to, `swap`), then no-fail commit is impossible to implement.
+이는 트랜잭션 프로그래밍에서 처리 중 문제가 발생하면 작업을 철회하고 문제가 발생하지 않으면 작업을 커밋하는 두 가지 주요 작업에 필요하기 때문에 실패해서는 안 되는 핵심 기능이다. 실패없는 연산을 이용하여 안전하게 작업을 철회할 수 있는 방법이 없다면 무장애 롤백(no-fail rollback)을 구현할 수 없다. 장애없는 작업을 사용하여 상태 변경을 안전하게 커밋할 방법이 없는 경우(특히, `swap`을 포함하되 이에 국한되지 않음) 장애없는 커밋을 구현할 수 없다.
 
-Consider the following advice and requirements found in the C++ Standard:
+C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
 
-> If a destructor called during stack unwinding exits with an exception, terminate is called (15.5.1). So destructors should generally catch exceptions and not let them propagate out of the destructor. --[\[C++03\]](#Cplusplus03) §15.2(3)
+> 스택 해제 중에 호출된 소멸자가 예외와 함께 종료되면 terminate가 호출된다 (15.5.1). 따라서 소멸자는 일반적으로 예외를 포착하고 예외가 소멸자 밖으로 전파되지 않도록 해야한다. --[\[C++03\]](#Cplusplus03) §15.2(3)
 >
 > No destructor operation defined in the C++ Standard Library (including the destructor of any type that is used to instantiate a standard-library template) will throw an exception. --[\[C++03\]](#Cplusplus03) §17.4.4.8(3)
 
