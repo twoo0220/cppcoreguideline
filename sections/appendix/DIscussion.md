@@ -293,12 +293,11 @@ Item 39에 설명된 대로, 일반 멤버 함수의 경우, `Base`에 대한 �
 
 C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
 
-> 스택 해제 중에 호출된 소멸자가 예외와 함께 종료되면 terminate가 호출된다 (15.5.1). 따라서 소멸자는 일반적으로 예외를 포착하고 예외가 소멸자 밖으로 전파되지 않도록 해야한다. --[\[C++03\]](#Cplusplus03) §15.2(3)
+> 스택 해제 중에 호출된 소멸자가 예외와 함께 종료되면 terminate가 호출된다 (15.5.1). 따라서 소멸자는 일반적으로 예외를 포착하고 예외가 소멸자 밖으로 전파되지 않도록 해야한다. --[\[C++03\]](../Bibliography.md) §15.2(3)
 >
-> No destructor operation defined in the C++ Standard Library (including the destructor of any type that is used to instantiate a standard-library template) will throw an exception. --[\[C++03\]](#Cplusplus03) §17.4.4.8(3)
+> C++ 표준 라이브러리에 정의된 소멸자 연산(표준 라이브러리 템플릿을 인스턴스화하는 데 사용되는 모든 유형의 소멸자 포함)은 예외를 발생시키지 않는다. --[\[C++03\]](../Bibliography.md) §17.4.4.8(3)
 
-Deallocation functions, including specifically overloaded `operator delete` and `operator delete[]`, fall into the same category, because they too are used during cleanup in general, and during exception handling in particular, to back out of partial work that needs to be undone.
-Besides destructors and deallocation functions, common error-safety techniques rely also on `swap` operations never failing -- in this case, not because they are used to implement a guaranteed rollback, but because they are used to implement a guaranteed commit. For example, here is an idiomatic implementation of `operator=` for a type `T` that performs copy construction followed by a call to a no-fail `swap`:
+구체적으로 말하자면 과부하가 걸린 `delete 연산자`와 `delete[] 연산자`를 포함한 할당 해제 함수는 일반적으로 정리하는 동안, 특히 예외 처리 중에 실행 취소가 필요한 작업 부분을 철회하는 데 사용되기 때문에 같은 범주에 속한다. 소멸자와 할당 해제 함수 외에도 일반적인 에러 안전 기술은 `swap` 연산이 실패하지 않는 것에 의존하는데, 이 경우에는 연산이 실패하지 않는 것을 보장된 롤백을 구현하는 데 사용되기 때문이 아니라 보장된 커밋을 구현하는 데 사용되기 때문이다. 예를 들어, 다음은 복사 생성을 수행한 다음 실패하지 않는 `swap`을 호출하는 `T`유형에 대한 `operator=`의 관용적 구현이다:
 
 ```c++
     T& T::operator=(const T& other)
@@ -309,9 +308,10 @@ Besides destructors and deallocation functions, common error-safety techniques r
     }
 ```
 
-(See also Item 56. ???)
+(또한 Item 56을 참고하라 ???)
 
-Fortunately, when releasing a resource, the scope for failure is definitely smaller. If using exceptions as the error reporting mechanism, make sure such functions handle all exceptions and other errors that their internal processing might generate. (For exceptions, simply wrap everything sensitive that your destructor does in a `try/catch(...)` block.) This is particularly important because a destructor might be called in a crisis situation, such as failure to allocate a system resource (e.g., memory, files, locks, ports, windows, or other system objects).
+다행히, 리소스를 해제할 때 실패할 수 있는 범위가 확실히 줄어든다.
+If using exceptions as the error reporting mechanism, make sure such functions handle all exceptions and other errors that their internal processing might generate. (For exceptions, simply wrap everything sensitive that your destructor does in a `try/catch(...)` block.) This is particularly important because a destructor might be called in a crisis situation, such as failure to allocate a system resource (e.g., memory, files, locks, ports, windows, or other system objects).
 
 When using exceptions as your error handling mechanism, always document this behavior by declaring these functions `noexcept`. (See Item 75.)
 
