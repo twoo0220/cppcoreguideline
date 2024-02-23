@@ -310,14 +310,14 @@ C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
 
 (또한 Item 56을 참고하라 ???)
 
-다행히, 리소스를 해제할 때 실패할 수 있는 범위가 확실히 줄어든다.
-If using exceptions as the error reporting mechanism, make sure such functions handle all exceptions and other errors that their internal processing might generate. (For exceptions, simply wrap everything sensitive that your destructor does in a `try/catch(...)` block.) This is particularly important because a destructor might be called in a crisis situation, such as failure to allocate a system resource (e.g., memory, files, locks, ports, windows, or other system objects).
+다행히, 리소스를 해제할 때 실패할 수 있는 범위가 확실히 줄어든다. 예외를 오류 보고 메커니즘으로 사용하는 경우, 해당 함수가 내부 처리에서 발생할 수 있는 모든 예외 및 기타 오류를 처리하는지 확인하라.
+(예외의 경우, 소멸자가 수행하는 모든 민감한 작업을 `try/catch(...)` 블록으로 감싸면 된다.) 이것은 특히 중요한데 시스템 리소스(예, 메모리, 파일, 잠금, 포트, 창 또는 기타 시스템 개체)를 할당하지 못하는 등의 위기 상황에서 소멸자가 호출될 수 있기 때문이다.
 
-When using exceptions as your error handling mechanism, always document this behavior by declaring these functions `noexcept`. (See Item 75.)
+예외를 오류 처리 메커니즘으로 사용할 때는, 항상 이러한 함수를 `noexcept`로 선언하여 이 동작을 문서화하라.(Item 75 참조)
 
 **References**: [\[C++CS\]](#CplusplusCS) Item 51; [\[C++03\]](#Cplusplus03) §15.2(3), §17.4.4.8(3), [\[Meyers96\]](#Meyers96) §11, [\[Stroustrup00\]](#Stroustrup00) §14.4.7, §E.2-4, [\[Sutter00\]](#Sutter00) §8, §16, [\[Sutter02\]](#Sutter02) §18-19
 
-## <a name="Sd-consistent"></a>Define Copy, move, and destroy consistently
+## <a name="Sd-consistent"></a>일관성 있는 복사, 이동, 소멸자를 정의하라
 
 ##### Reason
 
@@ -325,11 +325,11 @@ When using exceptions as your error handling mechanism, always document this beh
 
 ##### Note
 
-If you define a copy constructor, you must also define a copy assignment operator.
+복사 생성자를 정의하는 경우, 복사 할당 연산자도 정의해야 한다.
 
 ##### Note
 
-If you define a move constructor, you must also define a move assignment operator.
+이동 생성자를 정의하는 경우, 이동 할당 연산자도 정의해야 한다.
 
 ##### Example
 
@@ -339,57 +339,58 @@ If you define a move constructor, you must also define a move assignment operato
     public:
         X(const X&) { /* stuff */ }
 
-        // BAD: failed to also define a copy assignment operator
+        // BAD: 복사 할당 연산자도 정의하지 못했습니다
 
         X(x&&) noexcept { /* stuff */ }
 
-        // BAD: failed to also define a move assignment operator
+        // BAD: 이동 할당 연산자가 정의하지 못했습니다
     };
 
     X x1;
     X x2 = x1; // ok
-    x2 = x1;   // pitfall: either fails to compile, or does something suspicious
+    x2 = x1;   // 위험(pitfall): 컴파일에 실패하거나, 의심스러운 작업을 수행함
 ```
 
-If you define a destructor, you should not use the compiler-generated copy or move operation; you probably need to define or suppress copy and/or move.
+소멸자를 정의하는 경우, 컴파일러에서 생성된 복사 또는 이동 연산을 사용해서는 안 되며, 복사 및/또는 이동을 정의하거나 억제해야 할 수도 있다.
 
 ```c++
     class X {
         HANDLE hnd;
         // ...
     public:
-        ~X() { /* custom stuff, such as closing hnd */ }
-        // suspicious: no mention of copying or moving -- what happens to hnd?
+        ~X() { /* 사용자 지정 항목(예: hnd 닫기) */ }
+        // 의심스러운 작업 : 복사 또는 이동에 대한 언급이 없음
+        // - hnd는 어떻게 되는가?
     };
 
     X x1;
-    X x2 = x1; // pitfall: either fails to compile, or does something suspicious
-    x2 = x1;   // pitfall: either fails to compile, or does something suspicious
+    X x2 = x1; // 위험(pitfall): 컴파일에 실패하거나, 의심스러운 작업을 수행함
+    x2 = x1;   // 위험(pitfall): 컴파일에 실패하거나, 의심스러운 작업을 수행함
 ```
 
-If you define copying, and any base or member has a type that defines a move operation, you should also define a move operation.
+복사를 정의하고 기반 또는 멤버에 이동 연산을 정의하는 유형이 있는 경우 이동 연산도 정의해야 한다.
 
 ```c++
     class X {
-        string s; // defines more efficient move operations
-        // ... other data members ...
+        string s; // 보다 효율적인 이동 연산을 정의
+        // ... 다른 멤버 데이터들 ...
     public:
         X(const X&) { /* stuff */ }
         X& operator=(const X&) { /* stuff */ }
 
-        // BAD: failed to also define a move construction and move assignment
-        // (why wasn't the custom "stuff" repeated here?)
+        // BAD: 이동 생성 및 이동 할당도 정의하지 못함
+        // (여기서 사용자 정의 "stuff"를 왜 반복하지 않았는가?)
     };
 
     X test()
     {
         X local;
         // ...
-        return local;  // pitfall: will be inefficient and/or do the wrong thing
+        return local;  // 위험(pitfall): 비효율적이거나 잘못된 작업을 수행함
     }
 ```
 
-If you define any of the copy constructor, copy assignment operator, or destructor, you probably should define the others.
+복사 생성자, 복사 할당 연산자 또는 소멸자 중 하나를 정의하는 경우 다른 생성자도 정의해야 한다.
 
 ##### Note
 
