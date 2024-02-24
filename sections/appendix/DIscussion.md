@@ -394,15 +394,15 @@ C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
 
 ##### Note
 
-If you need to define any of these five functions, it means you need it to do more than its default behavior -- and the five are asymmetrically interrelated. Here's how:
+이 다섯 가지 함수 중 하나를 정의해야 한다는 것은 기본 동작 이상의 기능을 수행해야 한다는 의미이며, 이 다섯 가지 함수는 비대칭적으로 상호 연관되어 있다. 방법은 다음과 같다:
 
-* If you write/disable either of the copy constructor or the copy assignment operator, you probably need to do the same for the other: If one does "special" work, probably so should the other because the two functions should have similar effects. (See Item 53, which expands on this point in isolation.)
-* If you explicitly write the copying functions, you probably need to write the destructor: If the "special" work in the copy constructor is to allocate or duplicate some resource (e.g., memory, file, socket), you need to deallocate it in the destructor.
-* If you explicitly write the destructor, you probably need to explicitly write or disable copying: If you have to write a non-trivial destructor, it's often because you need to manually release a resource that the object held. If so, it is likely that those resources require careful duplication, and then you need to pay attention to the way objects are copied and assigned, or disable copying completely.
+* 복사 생성자나 복사 할당 연산자 중 하나를 작성/비활성화하는 경우 다른 하나에 대해서도 동일한 작업을 수행해야 할 것이다: 한 쪽이 "특별한" 작업을 수행한다면, 두 함수가 비슷한 효과를 가져야 하므로 다른 쪽도 그렇게 해야 할 것이다. (이 부분은 Item 53번 항목에서 자세히 설명한다)
+* 복사 함수를 명시적으로 작성하는 경우 소멸자를 작성해야 할 수도 있다: 복사 생성자의 "특별한" 작업이 일부 리소스(예: 메모리, 파일, 소켓)를 할당하거나 복제하는 것이라면 소멸자에서 해당 리소스를 할당 해제해야 한다.
+* 소멸자를 명시적으로 작성하는 경우 복사를 명시적으로 작성하거나 비활성화해야 할 수도 있다: 어떤 작업을 하는(non-trivial) 소멸자를 작성해야 하는 경우, 객체가 보유한 리소스를 수동으로 해제해야 하기 때문인 경우가 많다. 그렇다면 해당 리소스는 신중하게 복제해야 할 가능성이 높으므로 객체가 복사 및 할당되는 방식에 주의를 기울이거나 복사를 완전히 비활성화해야 한다.
 
-In many cases, holding properly encapsulated resources using RAII "owning" objects can eliminate the need to write these operations yourself. (See Item 13.)
+많은 경우 RAII "소유(owning)" 객체를 사용하여 적절하게 캡슐화된 리소스를 보유하면 이러한 작업을 직접 작성할 필요가 없다.(Item 13 참조)
 
-Prefer compiler-generated (including `=default`) special members; only these can be classified as "trivial", and at least one major standard library vendor heavily optimizes for classes having trivial special members. This is likely to become common practice.
+컴파일러가 생성해주는 (`=default` 포함) 특수 멤버를 선호하라. 이것들만 "아무 일도 하지 않은(trivial)"으로 분류할 수 있으며, 적어도 하나의 주요 표준 라이브러리 공급업체는 아무 일도 하지 않는 특수 멤버를 가진 클래스에 대해 훌륭하게 최적화한다. 이는 일반적인 관행이 될 가능성이 높다.
 
 **Exceptions**: When any of the special functions are declared only to make them nonpublic or virtual, but without special semantics, it doesn't imply that the others are needed.
 In rare cases, classes that have members of strange types (such as reference members) are an exception because they have peculiar copy semantics.
