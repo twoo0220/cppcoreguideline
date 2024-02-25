@@ -424,10 +424,10 @@ C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
 
 ##### Reason
 
-Prevent leaks. Leaks can lead to performance degradation, mysterious error, system crashes, and security violations.
+누수를 방지하라. 누수는 성능 저하, 원인 모를 오류, 시스템 충돌, 보안 위반으로 이어질 수 있다.
 
-**Alternative Formulation**:  
-Have every resource represented as an object of some class managing its lifetime.
+**대안 방법**:  
+모든 리소스를 수명을 관리하는 일부 클래스의 객체로 표현하라
 
 ##### Example
 
@@ -441,7 +441,7 @@ Have every resource represented as an object of some class managing its lifetime
     };
 ```
 
-This class is a resource handle. It manages the lifetime of the `T`s. To do so, `Vector` must define or delete [the set of special operations](???) (constructors, a destructor, etc.).
+이 클래스는 리소스 핸들이다. 이 클래스는 `T`의 수명을 관리한다. 이를 위해, `Vector`는 [특수 연산 집합을 정의하거나 삭제해야 한다](???) (생성자, 소멸자, 등등).
 
 ##### Example
 
@@ -449,13 +449,13 @@ This class is a resource handle. It manages the lifetime of the `T`s. To do so, 
 
 ##### Enforcement
 
-The basic technique for preventing leaks is to have every resource owned by a resource handle with a suitable destructor. A checker can find "naked `new`s". Given a list of C-style allocation functions (e.g., `fopen()`), a checker can also find uses that are not managed by a resource handle. In general, "naked pointers" can be viewed with suspicion, flagged, and/or analyzed. A complete list of resources cannot be generated without human input (the definition of "a resource" is necessarily too general), but a tool can be "parameterized" with a resource list.
+누수를 방지하는 기본 기술은 리소스가 소유한 모든 리소스에 적절한 소멸자가 있는 핸들을 갖도록 하는 것이다. 검사기는 "naked `new`s"을 찾을 수 있다. C 스타일 할당 함수(예: `fopen()`)의 목록이 주어지면 검사기는 리소스 핸들이 관리하지 않는 사용처도 찾을 수 있다. 일반적으로 "naked pointers"는 의심스럽게 보고, 플래그를 지정하고, 분석할 수 있다. 사람의 입력 없이는 리소스의 전체 목록을 생성할 수 없지만("리소스"의 정의가 너무 일반적일 수밖에 없음), 리소스 목록으로 도구를 "매개 변수화"할 수 있다.
 
 ### <a name="Cr-never"></a>토론: 핸들이 소유하지 않은 리소스를 잡은 채로 예외를 던지지 마라
 
 ##### Reason
 
-That would be a leak.
+이는 누수가 될 수 있다.
 
 ##### Example
 
