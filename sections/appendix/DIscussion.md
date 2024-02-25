@@ -315,7 +315,7 @@ C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
 
 예외를 오류 처리 메커니즘으로 사용할 때는, 항상 이러한 함수를 `noexcept`로 선언하여 이 동작을 문서화하라.(Item 75 참조)
 
-**References**: [\[C++CS\]](#CplusplusCS) Item 51; [\[C++03\]](#Cplusplus03) §15.2(3), §17.4.4.8(3), [\[Meyers96\]](#Meyers96) §11, [\[Stroustrup00\]](#Stroustrup00) §14.4.7, §E.2-4, [\[Sutter00\]](#Sutter00) §8, §16, [\[Sutter02\]](#Sutter02) §18-19
+**References**: [\[C++CS\]](../Bibliography.md) Item 51; [\[C++03\]](../Bibliography.md) §15.2(3), §17.4.4.8(3), [\[Meyers96\]](../Bibliography.md) §11, [\[Stroustrup00\]](../Bibliography.md) §14.4.7, §E.2-4, [\[Sutter00\]](../Bibliography.md) §8, §16, [\[Sutter02\]](../Bibliography.md) §18-19
 
 ## <a name="Sd-consistent"></a>일관성 있는 복사, 이동, 소멸자를 정의하라
 
@@ -404,24 +404,23 @@ C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
 
 컴파일러가 생성해주는 (`=default` 포함) 특수 멤버를 선호하라. 이것들만 "아무 일도 하지 않은(trivial)"으로 분류할 수 있으며, 적어도 하나의 주요 표준 라이브러리 공급업체는 아무 일도 하지 않는 특수 멤버를 가진 클래스에 대해 훌륭하게 최적화한다. 이는 일반적인 관행이 될 가능성이 높다.
 
-**Exceptions**: When any of the special functions are declared only to make them nonpublic or virtual, but without special semantics, it doesn't imply that the others are needed.
-In rare cases, classes that have members of strange types (such as reference members) are an exception because they have peculiar copy semantics.
-In a class holding a reference, you likely need to write the copy constructor and the assignment operator, but the default destructor already does the right thing. (Note that using a reference member is almost always wrong.)
+**예외**: 특수 함수가 특별한 의미 없이 public이 아니거나 가상으로만 선언된 경우 다른 함수가 필요하다는 것을 의미하지는 않는다. 드물게 참조 멤버와 같은 이상한 유형의 멤버를 가진 클래스는 독특한 복사 의미론을 가지고 있기 떄문에 예외를 가진다.
+참조를 보유한 클래스에서는 복사 생성자와 할당 연산자를 작성해야 하지만 기본 소멸자가 이미 올바른 작업을 수행한다. (참조 멤버를 사용하는 것은 거의 항상 잘못된 것이다.)
 
-**References**: [\[C++CS\]](#CplusplusCS) Item 52; [\[Cline99\]](#Cline99) §30.01-14, [\[Koenig97\]](#Koenig97) §4, [\[Stroustrup00\]](#Stroustrup00) §5.5, §10.4, [\[SuttHysl04b\]](#SuttHysl04b)
+**References**: [\[C++CS\]](../Bibliography.md) Item 52; [\[Cline99\]](../Bibliography.md) §30.01-14, [\[Koenig97\]](../Bibliography.md) §4, [\[Stroustrup00\]](../Bibliography.md) §5.5, §10.4, [\[SuttHysl04b\]](../Bibliography.md)
 
-Resource management rule summary:
+리소스 관리 규칙 요약:
 
-* [Provide strong resource safety; that is, never leak anything that you think of as a resource](#Cr-safety)
-* [Never throw while holding a resource not owned by a handle](#Cr-never)
-* [A "raw" pointer or reference is never a resource handle](#Cr-raw)
-* [Never let a pointer outlive the object it points to](#Cr-outlive)
-* [Use templates to express containers (and other resource handles)](#Cr-templates)
-* [Return containers by value (relying on move or copy elision for efficiency)](#Cr-value-return)
-* [If a class is a resource handle, it needs a constructor, a destructor, and copy and/or move operations](#Cr-handle)
-* [If a class is a container, give it an initializer-list constructor](#Cr-list)
+* [강력한 리소스 안전성을 제공하라. 즉, 리소스라고 생각되면 어떤 것도 누수되지 않아야 한다](#Cr-safety)
+* [핸들이 소유하지 않은 리소스를 잡은 채로 예외를 던지지 마라](#Cr-never)
+* ["원시(raw)" 포인터 또는 참조는 절대 리소스 핸들이 아니다](#Cr-raw)
+* [절대 포인터가 가리키는 객체보다 오래 지속되지 않도록 하라](#Cr-outlive)
+* [템플릿을 사용하여 컨테이너(및 기타 리소스 핸들)를 표현하라](#Cr-templates)
+* [(효율성을 위해 이동 또는 복사 생략에 의존하는)값으로 컨테이너 반환하라](#Cr-value-return)
+* [클래스가 리소스 핸들인 경우 생성자, 소멸자, 복사 및/또는 이동 연산이 필요하다](#Cr-handle)
+* [클래스가 컨테이너인 경우, 초기화리스트 생성자를 제공하라](#Cr-list)
 
-### <a name="Cr-safety"></a>Discussion: Provide strong resource safety; that is, never leak anything that you think of as a resource
+### <a name="Cr-safety"></a>토론: 강력한 리소스 안전성을 제공하라. 즉, 리소스라고 생각되면 어떤 것도 누수되지 않아야 한다
 
 ##### Reason
 
@@ -452,7 +451,7 @@ This class is a resource handle. It manages the lifetime of the `T`s. To do so, 
 
 The basic technique for preventing leaks is to have every resource owned by a resource handle with a suitable destructor. A checker can find "naked `new`s". Given a list of C-style allocation functions (e.g., `fopen()`), a checker can also find uses that are not managed by a resource handle. In general, "naked pointers" can be viewed with suspicion, flagged, and/or analyzed. A complete list of resources cannot be generated without human input (the definition of "a resource" is necessarily too general), but a tool can be "parameterized" with a resource list.
 
-### <a name="Cr-never"></a>Discussion: Never return or throw while holding a resource not owned by a handle
+### <a name="Cr-never"></a>토론: 핸들이 소유하지 않은 리소스를 잡은 채로 예외를 던지지 마라
 
 ##### Reason
 
@@ -503,7 +502,7 @@ A checker probably must rely on a human-provided list of resources.
 For starters, we know about the standard-library containers, `string`, and smart pointers.
 The use of `span` and `string_span` should help a lot (they are not resource handles).
 
-### <a name="Cr-raw"></a>Discussion: A "raw" pointer or reference is never a resource handle
+### <a name="Cr-raw"></a>토론: "원시(raw)" 포인터 또는 참조는 절대 리소스 핸들이 아니다
 
 ##### Reason
 
@@ -513,7 +512,7 @@ To be able to distinguish owners from views.
 
 This is independent of how you "spell" pointer: `T*`, `T&`, `Ptr<T>` and `Range<T>` are not owners.
 
-### <a name="Cr-outlive"></a>Discussion: Never let a pointer outlive the object it points to
+### <a name="Cr-outlive"></a>토론: 절대 포인터가 가리키는 객체보다 오래 지속되지 않도록 하라
 
 ##### Reason
 
@@ -546,7 +545,7 @@ The `string`s of `v` are destroyed upon exit from `bad()` and so is `v` itself. 
 
 Most compilers already warn about simple cases and has the information to do more. Consider any pointer returned from a function suspect. Use containers, resource handles, and views (e.g., `span` known not to be resource handles) to lower the number of cases to be examined. For starters, consider every class with a destructor as resource handle.
 
-### <a name="Cr-templates"></a>Discussion: Use templates to express containers (and other resource handles)
+### <a name="Cr-templates"></a>토론: 템플릿을 사용하여 컨테이너(및 기타 리소스 핸들)를 표현하라
 
 ##### Reason
 
@@ -562,7 +561,7 @@ To provide statically type-safe manipulation of elements.
     };
 ```
 
-### <a name="Cr-value-return"></a>Discussion: Return containers by value (relying on move or copy elision for efficiency)
+### <a name="Cr-value-return"></a>토론: (효율성을 위해 이동 또는 복사 생략에 의존하는)값으로 컨테이너 반환하라
 
 ##### Reason
 
@@ -589,7 +588,7 @@ See the Exceptions in [F.20](#Rf-out).
 
 Check for pointers and references returned from functions and see if they are assigned to resource handles (e.g., to a `unique_ptr`).
 
-### <a name="Cr-handle"></a>Discussion: If a class is a resource handle, it needs a constructor, a destructor, and copy and/or move operations
+### <a name="Cr-handle"></a>토론: 클래스가 리소스 핸들인 경우 생성자, 소멸자, 복사 및/또는 이동 연산이 필요하다
 
 ##### Reason
 
@@ -616,7 +615,7 @@ Now `Named` has a default constructor, a destructor, and efficient copy and move
 
 In general, a tool cannot know if a class is a resource handle. However, if a class has some of [the default operations](#SS-ctor), it should have all, and if a class has a member that is a resource handle, it should be considered as resource handle.
 
-### <a name="Cr-list"></a>Discussion: If a class is a container, give it an initializer-list constructor
+### <a name="Cr-list"></a>토론: 클래스가 컨테이너인 경우, 초기화리스트 생성자를 제공하라
 
 ##### Reason
 
