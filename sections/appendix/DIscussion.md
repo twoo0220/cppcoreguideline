@@ -471,7 +471,7 @@ C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
     }
 ```
 
-If `i == 0` the file handle for `a file` is leaked. On the other hand, the `ifstream` for `another file` will correctly close its file (upon destruction). If you must use an explicit pointer, rather than a resource handle with specific semantics, use a `unique_ptr` or a `shared_ptr` with a custom deleter:
+만약 `i == 0`이면 `파일`에 대한 파일 핸들이 누수된다. 반면에 `다른 파일`에 대한 `ifstream`은 (파괴 시) 파일을 올바르게 닫는다. 특정 의미론을 가진 리소스 핸들이 아닌 명시적 포인터를 사용해야 하는 경우 사용자 정의 삭제자(custom deleter)가 있는 `unique_ptr` 또는 `shared_ptr`을 사용하라:
 
 ```c++
     void f(int i)
@@ -497,20 +497,20 @@ Better:
 
 ##### Enforcement
 
-A checker must consider all "naked pointers" suspicious.
-A checker probably must rely on a human-provided list of resources.
-For starters, we know about the standard-library containers, `string`, and smart pointers.
-The use of `span` and `string_span` should help a lot (they are not resource handles).
+검사기는 모든 "날 포인터(naked pointers)"를 의심스러운 것으로 간주해야 한다.
+검사기는 아마도 사람이 제공한 리소스 목록에 의존해야 할 것이다.
+우선, 우리는 표준 라이브러리 컨테이너, `string`, 스마트 포인터에 대해 알고 있다.
+`span`과 `string_span`을 사용하면 많은 도움이 될 것이다(리소스 핸들이 아님).
 
 ### <a name="Cr-raw"></a>토론: "원시(raw)" 포인터 또는 참조는 절대 리소스 핸들이 아니다
 
 ##### Reason
 
-To be able to distinguish owners from views.
+소유자와 관찰자(view)를 구별할 수 있어야 한다.
 
 ##### Note
 
-This is independent of how you "spell" pointer: `T*`, `T&`, `Ptr<T>` and `Range<T>` are not owners.
+이것은 포인터를 "문법에 맞게 쓰는(spell)" 방법과는 무관하다: `T*`, `T&`, `Ptr<T>` 및 `Range<T>`는 소유자가 아니다.
 
 ### <a name="Cr-outlive"></a>토론: 절대 포인터가 가리키는 객체보다 오래 지속되지 않도록 하라
 
