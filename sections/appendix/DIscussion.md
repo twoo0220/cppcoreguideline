@@ -420,7 +420,7 @@ C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
 * [클래스가 리소스 핸들인 경우 생성자, 소멸자, 복사 및/또는 이동 연산이 필요하다](#Cr-handle)
 * [클래스가 컨테이너인 경우, 초기화리스트 생성자를 제공하라](#Cr-list)
 
-### <a name="Cr-safety"></a>토론: 강력한 리소스 안전성을 제공하라. 즉, 리소스라고 생각되면 어떤 것도 누수되지 않아야 한다
+### <a id="Cr-safety"></a>토론: 강력한 리소스 안전성을 제공하라. 즉, 리소스라고 생각되면 어떤 것도 누수되지 않아야 한다
 
 ##### Reason
 
@@ -451,7 +451,7 @@ C++ 표준에 나와 있는 다음 조언과 요구 사항을 고려하라:
 
 누수를 방지하는 기본 기술은 리소스가 소유한 모든 리소스에 적절한 소멸자가 있는 핸들을 갖도록 하는 것이다. 검사기는 "naked `new`s"을 찾을 수 있다. C 스타일 할당 함수(예: `fopen()`)의 목록이 주어지면 검사기는 리소스 핸들이 관리하지 않는 사용처도 찾을 수 있다. 일반적으로 "naked pointers"는 의심스럽게 보고, 플래그를 지정하고, 분석할 수 있다. 사람의 입력 없이는 리소스의 전체 목록을 생성할 수 없지만("리소스"의 정의가 너무 일반적일 수밖에 없음), 리소스 목록으로 도구를 "매개 변수화"할 수 있다.
 
-### <a name="Cr-never"></a>토론: 핸들이 소유하지 않은 리소스를 잡은 채로 예외를 던지지 마라
+### <a id="Cr-never"></a>토론: 핸들이 소유하지 않은 리소스를 잡은 채로 예외를 던지지 마라
 
 ##### Reason
 
@@ -502,7 +502,7 @@ Better:
 우선, 우리는 표준 라이브러리 컨테이너, `string`, 스마트 포인터에 대해 알고 있다.
 `span`과 `string_span`을 사용하면 많은 도움이 될 것이다(리소스 핸들이 아님).
 
-### <a name="Cr-raw"></a>토론: "원시(raw)" 포인터 또는 참조는 절대 리소스 핸들이 아니다
+### <a id="Cr-raw"></a>토론: "원시(raw)" 포인터 또는 참조는 절대 리소스 핸들이 아니다
 
 ##### Reason
 
@@ -512,19 +512,19 @@ Better:
 
 이것은 포인터를 "문법에 맞게 쓰는(spell)" 방법과는 무관하다: `T*`, `T&`, `Ptr<T>` 및 `Range<T>`는 소유자가 아니다.
 
-### <a name="Cr-outlive"></a>토론: 절대 포인터가 가리키는 객체보다 오래 지속되지 않도록 하라
+### <a id="Cr-outlive"></a>토론: 절대 포인터가 가리키는 객체보다 오래 지속되지 않도록 하라
 
 ##### Reason
 
-To avoid extremely hard-to-find errors. Dereferencing such a pointer is undefined behavior and could lead to violations of the type system.
+찾기 어려운 오류를 피하기 위해서다. 이러한 포인터를 역참조하는 것은 정의되지 않은 동작이며 타입 시스템을 위반할 수 있다.
 
 ##### Example
 
 ```c++
-    string* bad()   // really bad
+    string* bad()   // 정말 안좋은 예시
     {
         vector<string> v = { "This", "will", "cause", "trouble", "!" };
-        // leaking a pointer into a destroyed member of a destroyed object (v)
+        // 파괴된 객체 (v)의 파괴된 멤버로 포인터 누수
         return &v[0];
     }
 
@@ -532,20 +532,20 @@ To avoid extremely hard-to-find errors. Dereferencing such a pointer is undefine
     {
         string* p = bad();
         vector<int> xx = {7, 8, 9};
-        // undefined behavior: x may not be the string "This"
+        // 정의되지 않은 동작: x 는 "This" 문자열이 아닐 수도 있음
         string x = *p;
-        // undefined behavior: we don't know what (if anything) is allocated a location p
+        // 정의되지 않은 동작: p 위치에 할당된 것이 무엇인지(있다면) 알 수 없음
         *p = "Evil!";
     }
 ```
 
-The `string`s of `v` are destroyed upon exit from `bad()` and so is `v` itself. The returned pointer points to unallocated memory on the free store. This memory (pointed into by `p`) may have been reallocated by the time `*p` is executed. There may be no `string` to read and a write through `p` could easily corrupt objects of unrelated types.
+`bad()` 함수를 종료하면 `v`의 `문자열(string)`은 소멸되며 `v` 자체도 소멸된다. 반환된 포인터는 사용 가능한 저장소의 할당되지 않은 메모리를 가리킨다. 이 메모리(`p`가 가리키는) `*p`가 실행될 때 이미 재할당되었을 수 있다. 읽을 `문자열(string)`이 없을 수 있으며 `p`를 통한 쓰기는 관련 없는 유형의 객체를 쉽게 손상시킬 수 있다.
 
 ##### Enforcement
 
 Most compilers already warn about simple cases and has the information to do more. Consider any pointer returned from a function suspect. Use containers, resource handles, and views (e.g., `span` known not to be resource handles) to lower the number of cases to be examined. For starters, consider every class with a destructor as resource handle.
 
-### <a name="Cr-templates"></a>토론: 템플릿을 사용하여 컨테이너(및 기타 리소스 핸들)를 표현하라
+### <a id="Cr-templates"></a>토론: 템플릿을 사용하여 컨테이너(및 기타 리소스 핸들)를 표현하라
 
 ##### Reason
 
@@ -561,7 +561,7 @@ To provide statically type-safe manipulation of elements.
     };
 ```
 
-### <a name="Cr-value-return"></a>토론: (효율성을 위해 이동 또는 복사 생략에 의존하는)값으로 컨테이너 반환하라
+### <a id="Cr-value-return"></a>토론: (효율성을 위해 이동 또는 복사 생략에 의존하는)값으로 컨테이너 반환하라
 
 ##### Reason
 
@@ -588,7 +588,7 @@ See the Exceptions in [F.20](#Rf-out).
 
 Check for pointers and references returned from functions and see if they are assigned to resource handles (e.g., to a `unique_ptr`).
 
-### <a name="Cr-handle"></a>토론: 클래스가 리소스 핸들인 경우 생성자, 소멸자, 복사 및/또는 이동 연산이 필요하다
+### <a id="Cr-handle"></a>토론: 클래스가 리소스 핸들인 경우 생성자, 소멸자, 복사 및/또는 이동 연산이 필요하다
 
 ##### Reason
 
@@ -615,7 +615,7 @@ Now `Named` has a default constructor, a destructor, and efficient copy and move
 
 In general, a tool cannot know if a class is a resource handle. However, if a class has some of [the default operations](#SS-ctor), it should have all, and if a class has a member that is a resource handle, it should be considered as resource handle.
 
-### <a name="Cr-list"></a>토론: 클래스가 컨테이너인 경우, 초기화리스트 생성자를 제공하라
+### <a id="Cr-list"></a>토론: 클래스가 컨테이너인 경우, 초기화리스트 생성자를 제공하라
 
 ##### Reason
 
