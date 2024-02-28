@@ -543,20 +543,20 @@ Better:
 
 ##### Enforcement
 
-Most compilers already warn about simple cases and has the information to do more. Consider any pointer returned from a function suspect. Use containers, resource handles, and views (e.g., `span` known not to be resource handles) to lower the number of cases to be examined. For starters, consider every class with a destructor as resource handle.
+대부분의 컴파일러는 이미 간단한 경우에 대해 경고하고 더 많은 작업을 수행할 수 있는 정보를 가지고 있다. 함수에서 반환된 포인터는 의심스러운 것으로 간주하라. 컨테이너, 리소스 핸들, 뷰(예: 리소스 핸들이 아닌 것으로 알려진 `span`)를 사용하여 검사할 항목의 수를 줄여라. 우선 소멸자가 있는 모든 클래스를 리소스 핸들로 간주하라.
 
 ### <a id="Cr-templates"></a>토론: 템플릿을 사용하여 컨테이너(및 기타 리소스 핸들)를 표현하라
 
 ##### Reason
 
-To provide statically type-safe manipulation of elements.
+정적으로 타입이 안전한 요소 조작을 제공한다
 
 ##### Example
 
 ```c++
     template<typename T> class Vector {
         // ...
-        T* elem;   // point to sz elements of type T
+        T* elem;   // 타입 T의 sz 요소를 가리킴
         int sz;
     };
 ```
@@ -565,7 +565,7 @@ To provide statically type-safe manipulation of elements.
 
 ##### Reason
 
-To simplify code and eliminate a need for explicit memory management. To bring an object into a surrounding scope, thereby extending its lifetime.
+코드가 단순해지고 명시적인 메모리 관리가 필요없다. 범위를 둘러싼 곳으로 객체를 가져와서 수명을 연장시킨다.
 
 **See also**: [F.20, the general item about "out" output values](#Rf-out)
 
@@ -577,16 +577,16 @@ To simplify code and eliminate a need for explicit memory management. To bring a
         return ...;
     }
 
-    auto v = get_large_vector(); //  return by value is ok, most modern compilers will do copy elision
+    auto v = get_large_vector(); //  값으로 반환해도 괜찮음, 대부분의 최신 컴파일러는 복사 생략을 수행함
 ```
 
 ##### Exception
 
-See the Exceptions in [F.20](#Rf-out).
+[F.20](#Rf-out)의 예외를 참조하라.
 
 ##### Enforcement
 
-Check for pointers and references returned from functions and see if they are assigned to resource handles (e.g., to a `unique_ptr`).
+함수에서 반환된 포인터와 참조를 확인하고 리소스 핸들(예: `unique_ptr`)에 할당되었는지 확인하라.
 
 ### <a id="Cr-handle"></a>토론: 클래스가 리소스 핸들인 경우 생성자, 소멸자, 복사 및/또는 이동 연산이 필요하다
 
