@@ -592,15 +592,15 @@ Better:
 
 ##### Reason
 
-To provide complete control of the lifetime of the resource. To provide a coherent set of operations on the resource.
+리소스의 수명을 완벽하게 제어할 수 있다. 리소스에 대한 일관된 연산 집합을 제공한다.
 
 ##### Example
 
-    ??? Messing with pointers
+    ??? 포인터 엉망으로 만드는 예제
 
 ##### Note
 
-If all members are resource handles, rely on the default special operations where possible.
+모든 멤버가 리소스 핸들인 경우, 가능한 기본 특수 연산에 의존하라.
 
 ```c++
     template<typename T> struct Named {
@@ -609,17 +609,17 @@ If all members are resource handles, rely on the default special operations wher
     };
 ```
 
-Now `Named` has a default constructor, a destructor, and efficient copy and move operations, provided `T` has.
+이제 `Named`에는 기본 생성자, 소멸자, 효율적인 복사 및 이동 연산이 있으며, `T`에는 이를 제공한다.
 
 ##### Enforcement
 
-In general, a tool cannot know if a class is a resource handle. However, if a class has some of [the default operations](#SS-ctor), it should have all, and if a class has a member that is a resource handle, it should be considered as resource handle.
+일반적으로 툴(tool)은 클래스가 리소스 핸들인지 여부를 알 수 없다. 그러나, 클래스가 [기본 연산](#SS-ctor) 중 일부를 가지고 있다면 모두 가지고 있어야 하며, 클래스에 리소스 핸들인 멤버가 있다면 리소스 핸들로 간주해야 한다.
 
 ### <a id="Cr-list"></a>토론: 클래스가 컨테이너인 경우, 초기화리스트 생성자를 제공하라
 
 ##### Reason
 
-It is common to need an initial set of elements.
+일반적으로 초기 요소 집합이 필요하다.
 
 ##### Example
 
@@ -635,4 +635,4 @@ It is common to need an initial set of elements.
 
 ##### Enforcement
 
-When is a class a container? ???
+클래스가 컨테이너인 경우? ???
