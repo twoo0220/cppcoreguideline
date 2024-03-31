@@ -35,11 +35,11 @@
 
 ##### Reason
 
-If there is no need for optimization, the main result of the effort will be more errors and higher maintenance costs.
+최적화가 필요하지 않은 경우, 최적화에 쏟은 노력의 주된 결과는 더 많은 오류와 더 높은 유지 관리 비용으로 이어집니다.
 
 ##### Note
 
-Some people optimize out of habit or because it's fun.
+일부는 습관적으로 또는재밌어서 최적화를 하기도 합니다.
 
 ???
 
@@ -47,7 +47,7 @@ Some people optimize out of habit or because it's fun.
 
 ##### Reason
 
-Elaborately optimized code is usually larger and harder to change than unoptimized code.
+정교하게 최적화된 코드는 일반적으로 최적화되지 않은 코드보다 규모가 크고 변경하기가 더 어렵습니다.
 
 ???
 
@@ -55,28 +55,25 @@ Elaborately optimized code is usually larger and harder to change than unoptimiz
 
 ##### Reason
 
-Optimizing a non-performance-critical part of a program has no effect on system performance.
+프로그램의 성능에 중요하지 않은 부분을 최적화해도 시스템 성능에는 영향을 미치지 않습니다.
 
 ##### Note
 
-If your program spends most of its time waiting for the web or for a human, optimization of in-memory computation is probably useless.
+프로그램이 대부분의 시간을 웹이나 사람을 기다리는 데 소비한다면 내부 메모리 연산 최적화는 쓸모없을 수도 있습니다.
 
-Put another way: If your program spends 4% of its processing time doing
-computation A and 40% of its time doing computation B, a 50% improvement on A is
-only as impactful as a 5% improvement on B. (If you don't even know how much
-time is spent on A or B, see <a href="#Rper-reason">Per.1</a> and <a
-href="#Rper-Knuth">Per.2</a>.)
+다시 말해: 만약 프로그램이 처리 시간의 4%를 계산 A를 수행하고 40%의 시간을 계산 B에 사용하는 경우, A를 50% 개선하는 것은 B를 5% 개선하는 것만큼만 영향을 미칩니다(A 또는 B에 얼마나 많은 시간을 소비하는 지조차 모른다면, <a href="#Rper-reason">Per.1</a> 와 <a
+href="#Rper-Knuth">Per.2</a>를 참조하세요).
 
 ### <a name="Rper-simple"></a>Per.4: 복잡한 코드가 간단한 코드보다 빠르다고 추측하지 마라
 
 ##### Reason
 
-Simple code can be very fast. Optimizers sometimes do marvels with simple code
+간단한 코드는 매우 빠를 수 있습니다. 가끔 최적화는 간단한 코드로 놀라운 일을 해냅니다.
 
 ##### Example, good
 
 ```c++
-    // clear expression of intent, fast execution
+    // 명확한 의도 표현, 빠른 실행
 
     vector<uint8_t> v(100000);
 
@@ -87,7 +84,7 @@ Simple code can be very fast. Optimizers sometimes do marvels with simple code
 ##### Example, bad
 
 ```c++
-    // intended to be faster, but is actually slower
+    // 더 빠르게 하려고 의도했지만, 실제로는 느립니다.
 
     vector<uint8_t> v(100000);
 
@@ -108,7 +105,7 @@ Simple code can be very fast. Optimizers sometimes do marvels with simple code
 
 ##### Reason
 
-Low-level code sometimes inhibits optimizations. Optimizers sometimes do marvels with high-level code.
+저수준(low-level) 코드는 때때로 최적화를 방해합니다. 최적화는 가끔 고수준(high-level) 코드로 놀라운 일을 해냅니다.
 
 ##### Note
 
@@ -120,19 +117,15 @@ Low-level code sometimes inhibits optimizations. Optimizers sometimes do marvels
 
 ##### Reason
 
-The field of performance is littered with myth and bogus folklore.
-Modern hardware and optimizers defy naive assumptions; even experts are regularly surprised.
+성능 분야는 미신과 가짜 속설(bogus folklore)로 가득 차 있습니다. 최신 하드웨어와 최적화 도구는 단순한 가정들을(naive assumptions) 뒤엎고 있으며 전문가들조차 종종 놀라움을 금지 못합니다.
 
 ##### Note
 
-Getting good performance measurements can be hard and require specialized tools.
+정확한 성능 측정은 어렵고 전문적인 도구가 필요할 수 있습니다.
 
 ##### Note
 
-A few simple microbenchmarks using Unix `time` or the standard-library `<chrono>` can help dispel the most obvious myths.
-If you can't measure your complete system accurately, at least try to measure a few of your key operations and algorithms.
-A profiler can help tell you which parts of your system are performance critical.
-Often, you will be surprised.
+Unix `time`이나 표준 라이브러리 `<chrono>`를 사용한 몇 가지 간단한 마이크로 벤치마크는 가장 확실한 오해를 불식시키는 데 도움이 될 수 있습니다. 전체 시스템을 정확하게 측정할 수 없다면 최소한 몇 가지 주요 작업과 알고리듬을 측정해 보세요. 프로파일러(profiler)는 시스템의 어느 부분이 성능에 중요한지 알려줄 수 있습니다. 종종, 놀랄 것입니다.
 
 ???
 
@@ -140,22 +133,20 @@ Often, you will be surprised.
 
 ##### Reason
 
-Because we often need to optimize the initial design.
-Because a design that ignore the possibility of later improvement is hard to change.
+초기 디자인을 최적화해야 하는 경우가 많기 때문입니다.  
+나중에 개선할 가능성을 무시한 디자인은 변경하기 어렵기 때문입니다.
 
 ##### Example
 
-From the C (and C++) standard:
+C (와 C++) 표준에서:
 
 ```c++
     void qsort (void* base, size_t num, size_t size, int (*compar)(const void*, const void*));
 ```
 
-When did you even want to sort memory?
-Really, we sort sequences of elements, typically stored in containers.
-A call to `qsort` throws away much useful information (e.g., the element type), forces the user to repeat information
-already known (e.g., the element size), and forces the user to write extra code (e.g., a function to compare `double`s).
-This implies added work for the programmer, is error-prone, and deprives the compiler of information needed for optimization.
+언제 메모리를 정렬하고 싶어하십니까?
+실제로, 우리는 일반적으로 컨테이너에 저장된 요소들의 순서를 정렬합니다. `qsort` 함수를 호출하면 많은 유용한 정보(예: 요소 유형)가 버리고, 사용자가 이미 알고 있는 정보(예: 요소 크기)를 반복해야 하며, 추가 코드(예: `double`을 비교하는 함수)를 작성하도록 강요합니다.
+이것은 프로그래머의 추가 작업을 의미하고 오류가 발생하기 쉬우며 컴파일러에서 최적화에 필요한 정보를 빼앗아갑니다.
 
 ```c++
     double data[100];
