@@ -150,15 +150,15 @@ C (와 C++) 표준에서:
 
 ```c++
     double data[100];
-    // ... fill a ...
 
-    // 100 chunks of memory of sizeof(double) starting at
-    // address data using the order defined by compare_doubles
+    // compare_doubles 함수로 정의된 순서를 사용하여 주소 데이터에서
+    // 시작하는 sizeof(double)의 메모리 덩어리(chunk) 100개 채우기
     qsort(data, 100, sizeof(double), compare_doubles);
 ```
 
-From the point of view of interface design is that `qsort` throws away useful information.
+인터페이스 디자인의 관점에서 볼 때 `qsort`는 유용한 정보를 버린다는 것입니다.
 
+우리는 더 좋게할 수 있습니다 (C++ 98에서)
 We can do better (in C++98)
 
 ```c++
@@ -168,37 +168,29 @@ We can do better (in C++98)
     sort(data, data + 100);
 ```
 
-Here, we use the compiler's knowledge about the size of the array, the type of elements, and how to compare `double`s.
+여기서는 배열의 크기, 요소의 유형, `double`을 비교하는 방법에 대한 컴파일러의 지식을 사용합니다.
 
-With C++11 plus [concepts](#SS-concepts), we can do better still
+C++ 11과 [개념(concepts)](#SS-concepts)을 사용하면 더 좋게 만들 수 있습니다.
 
 ```c++
-    // Sortable specifies that c must be a
-    // random-access sequence of elements comparable with <
+    // Sortable 자료형은 < 와 비슷한 요소의 무작위 접근 순서여야 한다고 지정합니다.
     void sort(Sortable& c);
 
     sort(c);
 ```
 
-The key is to pass sufficient information for a good implementation to be chosen.
-In this, the `sort` interfaces shown here still have a weakness:
-They implicitly rely on the element type having less-than (`<`) defined.
-To complete the interface, we need a second version that accepts a comparison criteria:
+핵심은 좋은 구현이 선택될 수 있도록 충분한 정보를 전달하는 것입니다. 여기서 여기 표시된 `sort` 인터페이스는 여전히 약점이 있습니다: (`<`) 보다 작은 요소 유형이 정의된 것에 암시적으로 의존한다는 점입니다. 인터페이스를 완성하려면 비교 기준을 허용하는 두 번째 버전이 필요합니다:
 
 ```c++
-    // compare elements of c using p
+    // p를사용하여 C의 요소와 비교하기  
     void sort(Sortable& c, Predicate<Value_type<Sortable>> p);
 ```
 
-The standard-library specification of `sort` offers those two versions,
-but the semantics is expressed in English rather than code using concepts.
+표준 라이브러리 사양인 `sort`는 이 두 가지 버전을 제공합니다. 하지만 의미론(semantics)은 개념을 사용하는 코드가 아닌 영어로 표현됩니다.
 
 ##### Note
 
-Premature optimization is said to be [the root of all evil](#Rper-Knuth), but that's not a reason to despise performance.
-It is never premature to consider what makes a design amenable to improvement, and improved performance is a commonly desired improvement.
-Aim to build a set of habits that by default results in efficient, maintainable, and optimizable code.
-In particular, when you write a function that is not a one-off implementation detail, consider
+이른 최적화는 [모든 악의 근원](#Rper-Knuth)이라고 하지만, 그렇다고해서 성능을 경멸할 이유는 없습니다.  디자인을 개선할 수 있는 요소를 고려하는 것은 절대 이르지 않으며, 성능 개선은 일반적으로 바람직한 개선입니다.기본적으로 효율적이고, 유지 관리가 용이하며, 최적화 가능한 코드를 작성하는 일련의 습관을 기르는 것을 목표로 하세요. 특히 일회성 구현 세부 사항이 아닌 함수를 작성할 때는 다음 사항을 고려하세요.
 
 * Information passing:
 Prefer clean [interfaces](#S-interfaces) carrying sufficient information for later improvement of implementation.
@@ -322,15 +314,15 @@ Type violations, weak types (e.g. `void*`s), and low-level code (e.g., manipulat
 
 ##### Reason
 
-To decrease code size and run time.
-To avoid data races by using constants.
-To catch errors at compile time (and thus eliminate the need for error-handling code).
+코드 크기와 런타임을 줄이기 위해.
+상수를 사용하여 데이터 경합을 피하기 위해.
+컴파일 시 오류를 포착하기 위해(오류 처리 코드의 필요성을 제거합니다.)
 
 ##### Example
 
 ```c++
     double square(double d) { return d*d; }
-    static double s2 = square(2);    // old-style: dynamic initialization
+    static double s2 = square(2);    // 옛날 방식 : 동적 초기화
 
     constexpr double ntimes(double d, int n)   // assume 0 <= n
     {
@@ -338,68 +330,60 @@ To catch errors at compile time (and thus eliminate the need for error-handling 
             while (n--) m *= d;
             return m;
     }
-    constexpr double s3 {ntimes(2, 3)};  // modern-style: compile-time initialization
+    constexpr double s3 {ntimes(2, 3)};  // 최신 방식 : 컴파일 시 초기화
 ```
 
-Code like the initialization of `s2` isn't uncommon, especially for initialization that's a bit more complicated than `square()`.
-However, compared to the initialization of `s3` there are two problems:
+`s2`의 초기화와 같은 코드는 드물지 않으며, 특히 `square()`보다 조금 더 복잡한 초기화의 경우 더욱 그렇습니다. 그러나 `s3`의 초기화와 비교하면 두 가지 문제가 있습니다:
 
-* we suffer the overhead of a function call at run time
-* `s2` just might be accessed by another thread before the initialization happens.
+* 런타임에 함수 호출로 인한 오버헤드를 겪게 됩니다.
+* 초기화가 일어나기 전에 다른 스레드에서 `s2`에 접근할 수 있습니다.
 
-Note: you can't have a data race on a constant.
+Note: 상수를 두고 데이터 경합을 할 수 없습니다.
 
 ##### Example
 
-Consider a popular technique for providing a handle for storing small objects in the handle itself and larger ones on the heap.
+작은 객체는 핸들 자체에, 큰 객체는 힙에 저장할 수 있는 핸들을 제공하는 인기 있는 기법을 고려해 보세요.
 
 ```c++
     constexpr int on_stack_max = 20;
 
     template<typename T>
-    struct Scoped {     // store a T in Scoped
+    struct Scoped {     // Scoped 안에 T 저장
             // ...
         T obj;
     };
 
     template<typename T>
-    struct On_heap {    // store a T on the free store
+    struct On_heap {    // 힙에(free store) T 저장
             // ...
             T* objp;
     };
 
     template<typename T>
     using Handle = typename std::conditional<(sizeof(T) <= on_stack_max),
-                        Scoped<T>,      // first alternative
-                        On_heap<T>      // second alternative
+                        Scoped<T>,      // 첫 번째 대안
+                        On_heap<T>      // 두 번쨰 대안
                    >::type;
 
     void f()
     {
-        Handle<double> v1;                   // the double goes on the stack
-        Handle<std::array<double, 200>> v2;  // the array goes on the free store
+        Handle<double> v1;                   // double은 스택에 저장됩니다.
+        Handle<std::array<double, 200>> v2;  // array는 힙에(free store) 저장됩니다.
         // ...
     }
 ```
 
-Assume that `Scoped` and `On_heap` provide compatible user interfaces.
-Here we compute the optimal type to use at compile time.
-There are similar techniques for selecting the optimal function to call.
+`Scoped`와 `On_heap`이 호환 가능한 사용자 인터페이스를 제공한다고 가정합니다. 여기서는 컴파일 시 사용할 최적의 타입을 계산합니다. 호출할 최적의 함수를 선택하는 데는 비슷한 기법들이 있습니다.
 
 ##### Note
 
-The ideal is {not} to try execute everything at compile time.
-Obviously, most computations depend on inputs so they can't be moved to compile time,
-but beyond that logical constraint is the fact that complex compile-time computation can seriously increase compile times
-and complicate debugging.
-It is even possible to slow down code by compile-time computation.
-This is admittedly rare, but by factoring out a general computation into separate optimal sub-calculations it is possible to render the instruction cache less effective.
+모든 것을 컴파일 타임에 실행하는 것이 이상적인 것은 {아닙니다}. 물론 대부분의 계산은 입력에 의존하기 때문에 컴파일 타임으로 옮길 수 없습니다. 하지만 이러한 논리적 제약을 넘어 복잡한 컴파일 타임 계산은 컴파일 시간을 심각하게 증가시킬 수 있고 디버깅을 복잡하게 만들 수 있습니다. 심지어 컴파일 시간 계산으로 인해 코드 속도가 느려질 수도 있습니다. 물론 이런 경우는 드물지만 일반적인 계산을 별도의 최적 하위 계산으로 분리하면 명령어 캐시의 효율성을 떨어뜨릴 수 있습니다.
 
 ##### Enforcement
 
-* Look for simple functions that might be constexpr (but are not).
-* Look for functions called with all constant-expression arguments.
-* Look for macros that could be constexpr.
+* constexpr 일 수 있지만 그렇지 않은 간단한 함수를 찾습니다.
+* 모든 상수 표현식 인수로 호출되는 함수를 찾습니다.
+* constexpr 이 될 수 있는 매크로를 찾습니다.
 
 ### <a name="Rper-alias"></a>Per.12: 불필요한 별칭을 제거하라
 
@@ -441,7 +425,7 @@ This is admittedly rare, but by factoring out a general computation into separat
 
 ##### Reason
 
-Performance is very sensitive to cache performance and cache algorithms favor simple (usually linear) access to adjacent data.
+성능은 캐시 성능에 매우 민감하며 캐시 알고리듬은 인전한 데이터에 대한 간단한(일반적으로 선형) 접근을 선호합니다.
 
 ##### Example
 
