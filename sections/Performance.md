@@ -192,31 +192,13 @@ C++ 11과 [개념(concepts)](#SS-concepts)을 사용하면 더 좋게 만들 수
 
 이른 최적화는 [모든 악의 근원](#Rper-Knuth)이라고 하지만, 그렇다고해서 성능을 경멸할 이유는 없습니다.  디자인을 개선할 수 있는 요소를 고려하는 것은 절대 이르지 않으며, 성능 개선은 일반적으로 바람직한 개선입니다.기본적으로 효율적이고, 유지 관리가 용이하며, 최적화 가능한 코드를 작성하는 일련의 습관을 기르는 것을 목표로 하세요. 특히 일회성 구현 세부 사항이 아닌 함수를 작성할 때는 다음 사항을 고려하세요.
 
-* Information passing:
-Prefer clean [interfaces](#S-interfaces) carrying sufficient information for later improvement of implementation.
-Note that information flows into and out of an implementation through the interfaces we provide.
-* Compact data: By default, [use compact data](#Rper-compact), such as `std::vector` and [access it in a systematic fashion](#Rper-access).
-If you think you need a linked structure, try to craft the interface so that this structure isn't seen by users.
-* Function argument passing and return:
-Distinguish between mutable and non-mutable data.
-Don't impose a resource management burden on your users.
-Don't impose spurious run-time indirections on your users.
-Use [conventional ways](#Rf-conventional) of passing information through an interface;
-unconventional and/or "optimized" ways of passing data can seriously complicate later reimplementation.
-* Abstraction:
-Don't overgeneralize; a design that tries to cater for every possible use (and misuse) and defers every design decision for later
-(using compile-time or run-time indirections) is usually a complicated, bloated, hard-to-understand mess.
-Generalize from concrete examples, preserving performance as we generalize.
-Do not generalize based on mere speculation about future needs.
-The ideal is zero-overhead generalization.
-* Libraries:
-Use libraries with good interfaces.
-If no library is available build one yourself and imitate the interface style from a good library.
-The [standard library](#S-stdlib) is a good first place to look for inspiration.
-* Isolation:
-Isolate your code from messy and/or old-style code by providing an interface of your choosing to it.
-This is sometimes called "providing a wrapper" for the useful/necessary but messy code.
-Don't let bad designs "bleed into" your code.
+* 정보 전달:
+나중에 구현을 개선할 수 있도록 충분한 정보를 전달하는 깔끔한 [인터페이스](#S-interfaces)를 선호하세요. 정보는 우리가 제공하는 인터페이스를 통해 구현으로 들어오고 나간다는 점을 유의하세요.
+* 데이터 압축: 기본적으로, `std::vector`와 같은 [압축 데이터 사용](#Rper-compact)과 [체계적인 방식으로 접근](#Rper-access)하는 것을 권장합니다. 연결된 구조체가 필요하다면, 이 구조체가 사용자에게 보이지 않도록 인터페이스를 공들여 만드세요.
+* 함수 인자 전달 및 반환: 수정 가능한 데이터와 수정 불가능한 데이터를 구분하세요. 사용자에게 리소스 관리 부담을 주지 마세요. 사용자에게 잘못된 런타임 간접 참조를 강요하지 마세요. 인터페이스를 통해 정보를 전달하는 [기존 방식](#Rf-conventional)을 사용하세요; 기존 방식이 아니거나 "최적화된" 데이터 전달 방식은 나중에 재구현을 심각할 정도로 복잡하게 만들 수 있습니다.
+* 추상화: 지나치게 일반화하지 마세요. 가능한 모든 사용(및 오용)을 수용하려 하고 모든 디자인 결정을 나중으로(컴파일 타임 또는 런타임 간접 참조를 사용하여) 미루는 디자인은 일반적으로 복잡하고 규모가 커지며 이해하기 어렵도록 엉망진창이 됩니다. 구체적인 사례를 통해 일반화하되, 일반화할 때 성능을 유지합니다. 미래의 필요성에 대한 단순한 추측을 바탕으로 일반화하지 마세요. 가장 이상적인 것은 제로 오버헤드(zero-overhead) 일반화입니다.
+* 라이브러리: 인터페이스가 좋은 라이브러리를 사용하세요. 사용할 수 있는 라이브러리가 없다면 직접 라이브러리를 만들고 좋은 라이브러리의 인터페이스 스타일을 모방하세요. [표준 라이브러리](#S-stdlib)는 가장 먼저 영감을 얻을 수 있는 좋은 곳입니다.
+* 분리(isolation): 원하는 인터페이스를 제공하여 지저분하거나 오래된 스타일의 코드로부터 분리하세요. 이것은 유용하고 필요하지만 지저분한 코드를 위한 "래퍼(wrapper) 제공"이라고도 불립니다. 나쁜 디자인이 코드에 "스며들지" 않도록 하세요.
 
 ##### Example
 
@@ -227,20 +209,18 @@ Consider:
     bool binary_search(ForwardIterator first, ForwardIterator last, const T& val);
 ```
 
-`binary_search(begin(c), end(c), 7)` will tell you whether `7` is in `c` or not.
-However, it will not tell you where that `7` is or whether there are more than one `7`.
+`binary_search(begin(c), end(c), 7)` 는 `7`이 `c`에 있는지 여부를 알려줍니다. 그러나 그 `7`이 어디에 있는지 아니면 `7`이 두 개 이상 있는지 여부를 알려주지 않습니다.
 
-Sometimes, just passing the minimal amount of information back (here, `true` or `false`) is sufficient, but a good interface passes
-needed information back to the caller. Therefore, the standard library also offers
+때로는 최소한의 정보량(여기서는 `true` 또는 `false`)만 전달해도 충분하지만, 좋은 인터페이스 필요한 정보를 호출자에게 다시 전달합니다. 그러니 표준 라이브러리는 다음과 같은 기능도 제공합니다.
 
 ```c++
     template <class ForwardIterator, class T>
     ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& val);
 ```
 
-`lower_bound` returns an iterator to the first match if any, otherwise to the first element greater than `val`, or `last` if no such element is found.
+`lower_bound` 는 일치하는 요소가 있으면 첫 번째 요소로, 일치하지 않으면 `val`보다 큰 첫 번째 요소로, 일치하는 요소가 없으면 `last`로 반복자를 반환합니다.
 
-However, `lower_bound` still doesn't return enough information for all uses, so the standard library also offers
+그러나 `lower_bound`는 여전히 모든 용도에 대해 충분한 정보를 반환하지 않으므로 표준 라이브러리에서도 다음을 제공합니다
 
 ```c++
     template <class ForwardIterator, class T>
@@ -248,7 +228,7 @@ However, `lower_bound` still doesn't return enough information for all uses, so 
     equal_range(ForwardIterator first, ForwardIterator last, const T& val);
 ```
 
-`equal_range` returns a `pair` of iterators specifying the first and one beyond last match.
+`equal_range`는 첫 번째와 마지막 일치 이후를 지정하는 반복자의 `pair`를 반환합니다.
 
 ```c++
     auto r = equal_range(begin(c), end(c), 7);
@@ -256,57 +236,41 @@ However, `lower_bound` still doesn't return enough information for all uses, so 
         cout << *p << '\n';
 ```
 
-Obviously, these three interfaces are implemented by the same basic code.
-They are simply three ways of presenting the basic binary search algorithm to users,
-ranging from the simplest ("make simple things simple!")
-to returning complete, but not always needed, information ("don't hide useful information").
-Naturally, crafting such a set of interfaces requires experience and domain knowledge.
+물론 이 세 가지 인터페이스는 동일한 기본 코드로 구현됩니다. 가장 간단한 방법("간단한 것을 간단하게!")부터 완전한 정보를 반환하지만 항상 필요한 것은 아닌 정보("유용한 정보를 숨기기 마세요")에 이르기까지 기본적인 이진 탐색 알고리듬을 사용자에게 제시하는 세 가지 방법일 뿐입니다. 당연히 이러한 인터페이스를 제작하려면 경험과 도메인 지식이 필요합니다.
 
 ##### Note
 
-Do not simply craft the interface to match the first implementation and the first use case you think of.
-Once your first initial implementation is complete, review it; once you deploy it, mistakes will be hard to remedy.
+단순히 첫 번째 구현과 가장 먼저 생각나는 사용 사례에 맞춰 인터페이스를 만들지 마세요. 첫 번째 초기 구현이 완료되면 이를 검토하세요. 일단 배포되면 실수를 수정하기 어렵습니다.
 
 ##### Note
 
-A need for efficiency does not imply a need for [low-level code](#Rper-low).
-High-level code does not imply slow or bloated.
+효율성의 필요성은 [저수준 코드](#Rper-low)의 필요성을 의미하지는 않습니다. 고수준 코드는 느리거나 비대하다는 뜻이 아닙니다.
 
 ##### Note
 
-Things have costs.
-Don't be paranoid about costs (modern computers really are very fast),
-but have a rough idea of the order of magnitude of cost of what you use.
-For example, have a rough idea of the cost of
-a memory access,
-a function call,
-a string comparison,
-a system call,
-a disk access,
-and a message through a network.
+모든 일에는 비용이 듭니다. 비용에 대해 지나치게 걱정할 필요는 없지만(최신 컴퓨터는 정말 빠릅니다), 자신이 사용하는 것의 비용 규모를 대략적으로 파악하세요.
+예를 들어 메모리 접근, 함수 호출, 문자열 비교, 시스템 호출, 디스크 접근, 네트워크를 통한 메시지의 비용에 대해 대략적으로 파악하세요.
 
 ##### Note
 
-If you can only think of one implementation, you probably don't have something for which you can devise a stable interface.
-Maybe, it is just an implementation detail - not every piece of code needs a stable interface - but pause and consider.
-One question that can be useful is
-"what interface would be needed if this operation should be implemented using multiple threads? be vectorized?"
+한 가지 구현만 떠올릴 수 있다면, 아마도 안정적인 인터페이스를 고안할 수 있는 무언가가 없는 것입니다.
+모든 코드에 안정적인 인터페이스가 필요한 것은 아니므로 구현 세부 사항일 수도 있지만 잠시 멈춰고 생각해 보세요.
+"이 작업을 멀티 스레드를 사용하여 구현해야만 한다면 어떤 인터페이스가 필요할까? 벡터화할까?"라는 질문이 유용할 수 있습니다.
 
 ##### Note
 
-This rule does not contradict the [Don't optimize prematurely](#Rper-Knuth) rule.
-It complements it encouraging developers enable later - appropriate and non-premature - optimization, if and where needed.
+이 규칙은 [성급하게 최적화하지 마세요](#Rper-Knuth) 규칙과 모순되지 않습니다. 이 규칙은 개발자가 필요한 경우 적절하고 시기상조가 아닌 최적화를 나중에 활성화하도록 권장함으로써 이를 보완합니다.
 
 ##### Enforcement
 
-Tricky.
-Maybe looking for `void*` function arguments will find examples of interfaces that hinder later optimization.
+까다롭습니다.
+아마도 `void*` 함수 인자를 찾아보면 나중에 최적화를 방해하는 인터페이스의 예시를 찾을 수 있을 것입니다.
 
 ### <a name="Rper-type"></a>Per.10: 정적 타입 시스템에 의지하라
 
 ##### Reason
 
-Type violations, weak types (e.g. `void*`s), and low-level code (e.g., manipulation of sequences as individual bytes) make the job of the optimizer much harder. Simple code often optimizes better than hand-crafted complex code.
+타입 위반, 약한 타입(예: `void*`), 저수준 코드(예: 개별 바이트 단위로 순서 조작)는 최적화 도구의 작업을 훨씬 더 어렵게 만듭니다. 보통 간단한 코드가 수작업으로 만든 복잡한 코드보다 더 잘 최적화되는 경우가 많습니다.
 
 ???
 
